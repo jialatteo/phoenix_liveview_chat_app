@@ -4,7 +4,7 @@ defmodule Chat.Messages.Message do
 
   schema "messages" do
     field :content, :string
-    field :user_id, :id
+    belongs_to :user, Chat.Users.User
 
     timestamps(type: :utc_datetime)
   end
@@ -12,7 +12,8 @@ defmodule Chat.Messages.Message do
   @doc false
   def changeset(message, attrs) do
     message
-    |> cast(attrs, [:content])
-    |> validate_required([:content])
+    |> cast(attrs, [:content, :user_id])
+    |> validate_required([:content, :user_id])
+    |> assoc_constraint(:user)
   end
 end

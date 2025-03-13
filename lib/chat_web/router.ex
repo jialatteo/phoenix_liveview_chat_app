@@ -20,8 +20,15 @@ defmodule ChatWeb.Router do
   scope "/", ChatWeb do
     pipe_through :browser
 
-    # get "/", PageController, :home
-    live "/chat", ChatLive
+    get "/", PageController, :home
+
+    live_session :live_chat_session,
+      on_mount: [
+        {ChatWeb.UserAuth, :ensure_authenticated},
+        {ChatWeb.UserAuth, :mount_current_user}
+      ] do
+      live "/chat", ChatLive
+    end
   end
 
   # Other scopes may use custom stacks.

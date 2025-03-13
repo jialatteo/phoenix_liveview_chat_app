@@ -18,7 +18,9 @@ defmodule Chat.Messages do
 
   """
   def list_messages do
-    Repo.all(Message)
+    Message
+    |> preload(:user)
+    |> Repo.all()
   end
 
   @doc """
@@ -53,6 +55,13 @@ defmodule Chat.Messages do
     %Message{}
     |> Message.changeset(attrs)
     |> Repo.insert()
+    |> case do
+      {:ok, message} ->
+        broadcast({:ok, message |> Repo.preload(:user)}, :message_created)
+
+      error ->
+        broadcast(error, :message_created)
+    end
   end
 
   @doc """
@@ -100,5 +109,17 @@ defmodule Chat.Messages do
   """
   def change_message(%Message{} = message, attrs \\ %{}) do
     Message.changeset(message, attrs)
+  end
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(Chat.PubSub, "messages")
+  end
+
+  defp broadcast({:error, _reason} = error, _event), do: error
+
+  defp broadcast({:ok, message}, event) do
+    Phoenix.PubSub.broadcast(Chat.PubSub, "messages", {event, message})
+    IO.inspect(message, label: "wtf")
+    {:ok, message}
   end
 end
