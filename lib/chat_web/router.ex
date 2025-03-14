@@ -27,7 +27,8 @@ defmodule ChatWeb.Router do
         {ChatWeb.UserAuth, :ensure_authenticated},
         {ChatWeb.UserAuth, :mount_current_user}
       ] do
-      live "/chat", ChatLive
+      live "/chat/new", RoomCreateLive
+      live "/chat/:room_id", ChatLive
     end
   end
 
