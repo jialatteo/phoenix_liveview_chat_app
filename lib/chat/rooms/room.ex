@@ -4,6 +4,7 @@ defmodule Chat.Rooms.Room do
 
   schema "rooms" do
     field :name, :string
+    has_many :messages, Chat.Messages.Message
 
     timestamps(type: :utc_datetime)
   end

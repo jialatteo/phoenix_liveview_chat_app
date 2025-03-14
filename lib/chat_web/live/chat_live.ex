@@ -12,7 +12,7 @@ defmodule ChatWeb.ChatLive do
 
     {:ok,
      socket
-     |> stream(:messages, Messages.list_messages())
+     |> stream(:messages, Messages.get_messages_from_room(room_id))
      |> assign(:room, Rooms.get_room!(room_id))
      |> assign(:form, to_form(changeset))}
   end
@@ -48,7 +48,10 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_event("save", %{"message" => message_params}, socket) do
-    message_params = Map.put(message_params, "user_id", socket.assigns.current_user.id)
+    message_params =
+      message_params
+      |> Map.put("user_id", socket.assigns.current_user.id)
+      |> Map.put("room_id", socket.assigns.room.id)
 
     case Messages.create_message(message_params) do
       {:ok, _message} ->

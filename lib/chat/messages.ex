@@ -23,6 +23,14 @@ defmodule Chat.Messages do
     |> Repo.all()
   end
 
+  def get_messages_from_room(room_id) do
+    Message
+    |> preload(:user)
+    |> preload(:room)
+    |> where([m], m.room_id == ^room_id)
+    |> Repo.all()
+  end
+
   @doc """
   Gets a single message.
 
