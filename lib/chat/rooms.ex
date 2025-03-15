@@ -50,14 +50,10 @@ defmodule Chat.Rooms do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_room(params = %{"user_id" => user_id, "name" => name} \\ %{}) do
-    IO.inspect(params, label: "context create_room")
-
+  def create_room(%{"user_id" => user_id, "name" => name} \\ %{}) do
     Ecto.Multi.new()
     |> Ecto.Multi.insert(:room, Room.changeset(%Room{}, %{"name" => name}))
     |> Ecto.Multi.insert(:user_room, fn %{room: room} ->
-      IO.inspect(room, label: "room inserted")
-
       UserRoom.changeset(%UserRoom{}, %{
         "user_id" => user_id,
         "room_id" => room.id,

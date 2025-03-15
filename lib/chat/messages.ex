@@ -127,7 +127,6 @@ defmodule Chat.Messages do
 
   defp broadcast({:ok, message}, event) do
     Phoenix.PubSub.broadcast(Chat.PubSub, "messages", {event, message})
-    IO.inspect(message, label: "wtf")
     {:ok, message}
   end
 end
