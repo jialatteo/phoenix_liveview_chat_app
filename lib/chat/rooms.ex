@@ -6,9 +6,7 @@ defmodule Chat.Rooms do
   import Ecto.Query, warn: false
   alias Chat.Repo
 
-  alias Chat.Rooms
   alias Chat.Rooms.Room
-  alias Chat.UserRooms
   alias Chat.UserRooms.UserRoom
 
   @doc """
@@ -52,23 +50,27 @@ defmodule Chat.Rooms do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_room(%{"user_id" => user_id, "name" => name} \\ %{}) do
-    room_changeset = Rooms.change_room(%Room{}, %{"name" => name})
-
-    user_room_changeset =
-      UserRooms.change_user_room(%UserRoom{}, %{
-        "name" => name,
-        "user_id" => user_id,
-        "is_admin" => true
-      })
+  def create_room(params = %{"user_id" => user_id, "name" => name} \\ %{}) do
+    IO.inspect(params, label: "context create_room")
 
     Ecto.Multi.new()
-    |> Ecto.Multi.insert(:room, room_changeset)
-    |> Ecto.Multi.insert(:user_room, user_room_changeset)
+    |> Ecto.Multi.insert(:room, Room.changeset(%Room{}, %{"name" => name}))
+    |> Ecto.Multi.insert(:user_room, fn %{room: room} ->
+      IO.inspect(room, label: "room inserted")
+
+      UserRoom.changeset(%UserRoom{}, %{
+        "user_id" => user_id,
+        "room_id" => room.id,
+        "is_admin" => true
+      })
+    end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{room: room}} -> {:ok, room}
-      {:error, _step, changeset, _changes} -> {:error, changeset}
+      {:ok, %{room: room}} ->
+        {:ok, room}
+
+      {:error, _step, reason, _changes_so_far} ->
+        {:error, reason}
     end
   end
 

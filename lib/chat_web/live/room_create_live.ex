@@ -41,17 +41,27 @@ defmodule ChatWeb.RoomCreateLive do
   end
 
   def handle_event("save", %{"room" => room_params}, socket) do
+    IO.inspect(room_params, label: "handle event room_params")
     room_params = Map.put(room_params, "user_id", socket.assigns.current_user.id)
 
     case Rooms.create_room(room_params) do
       {:ok, room} ->
+        IO.puts("okay!")
+
         {:noreply,
          socket
          |> assign(:form, to_form(Rooms.change_room(%Room{})))
          |> put_flash(:info, "Room #{room.name} created")}
 
       {:error, changeset} ->
+        IO.puts("fuck!")
+        IO.inspect(changeset, label: "error changeset")
         {:noreply, socket |> assign(:form, to_form(changeset))}
     end
+  end
+
+  def handle_event("save", params, socket) do
+    IO.inspect(params, label: "fallback function")
+    {:noreply, socket}
   end
 end

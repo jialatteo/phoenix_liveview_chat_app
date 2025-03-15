@@ -5,7 +5,7 @@ defmodule Chat.UserRooms.UserRoom do
   schema "users_rooms" do
     field :is_admin, :boolean, default: false
     belongs_to :user, Chat.Users.User
-    belongs_to :room, Chat.Users.User
+    belongs_to :room, Chat.Rooms.Room
 
     timestamps(type: :utc_datetime)
   end
