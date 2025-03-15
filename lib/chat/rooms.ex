@@ -6,7 +6,10 @@ defmodule Chat.Rooms do
   import Ecto.Query, warn: false
   alias Chat.Repo
 
+  alias Chat.Rooms
   alias Chat.Rooms.Room
+  alias Chat.UserRooms
+  alias Chat.UserRooms.UserRoom
 
   @doc """
   Returns the list of rooms.
@@ -49,10 +52,24 @@ defmodule Chat.Rooms do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_room(attrs \\ %{}) do
-    %Room{}
-    |> Room.changeset(attrs)
-    |> Repo.insert()
+  def create_room(%{"user_id" => user_id, "name" => name} \\ %{}) do
+    room_changeset = Rooms.change_room(%Room{}, %{"name" => name})
+
+    user_room_changeset =
+      UserRooms.change_user_room(%UserRoom{}, %{
+        "name" => name,
+        "user_id" => user_id,
+        "is_admin" => true
+      })
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:room, room_changeset)
+    |> Ecto.Multi.insert(:user_room, user_room_changeset)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{room: room}} -> {:ok, room}
+      {:error, _step, changeset, _changes} -> {:error, changeset}
+    end
   end
 
   @doc """

@@ -41,7 +41,7 @@ defmodule ChatWeb.RoomCreateLive do
   end
 
   def handle_event("save", %{"room" => room_params}, socket) do
-    IO.inspect(room_params, label: "save room_params")
+    room_params = Map.put(room_params, "user_id", socket.assigns.current_user.id)
 
     case Rooms.create_room(room_params) do
       {:ok, room} ->

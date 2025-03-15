@@ -9,3 +9,12 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+users = [
+  %{email: "adam@gmail.com", password: "password1234"},
+  %{email: "bob@gmail.com", password: "password1234"}
+]
+
+Enum.each(users, fn user_attrs ->
+  Chat.Users.register_user(user_attrs)
+end)

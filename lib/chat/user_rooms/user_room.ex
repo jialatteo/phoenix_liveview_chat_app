@@ -3,9 +3,9 @@ defmodule Chat.UserRooms.UserRoom do
   import Ecto.Changeset
 
   schema "users_rooms" do
-
-    field :user_id, :id
-    field :room_id, :id
+    field :is_admin, :boolean, default: false
+    belongs_to :user, Chat.Users.User
+    belongs_to :room, Chat.Users.User
 
     timestamps(type: :utc_datetime)
   end
@@ -13,7 +13,7 @@ defmodule Chat.UserRooms.UserRoom do
   @doc false
   def changeset(user_room, attrs) do
     user_room
-    |> cast(attrs, [])
-    |> validate_required([])
+    |> cast(attrs, [:user_id, :room_id, :is_admin])
+    |> validate_required([:user_id, :room_id])
   end
 end
