@@ -55,8 +55,4 @@ defmodule ChatWeb.RoomCreateLive do
         {:noreply, socket |> assign(:form, to_form(changeset))}
     end
   end
-
-  def handle_event("save", params, socket) do
-    {:noreply, socket}
-  end
 end

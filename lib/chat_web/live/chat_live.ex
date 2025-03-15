@@ -3,7 +3,6 @@ defmodule ChatWeb.ChatLive do
   alias Chat.Messages
   alias Chat.Messages.Message
   alias Chat.Rooms
-  alias Chat.Rooms.Room
 
   def mount(params, _session, socket) do
     if connected?(socket), do: Chat.Messages.subscribe()
@@ -12,6 +11,7 @@ defmodule ChatWeb.ChatLive do
 
     {:ok,
      socket
+     |> stream(:rooms, Rooms.list_rooms())
      |> stream(:messages, Messages.get_messages_from_room(room_id))
      |> assign(:room, Rooms.get_room!(room_id))
      |> assign(:form, to_form(changeset))}
@@ -19,19 +19,44 @@ defmodule ChatWeb.ChatLive do
 
   def render(assigns) do
     ~H"""
-    <h1 class="text-4xl">
-      ROOM: <span class="text-blue-400">{@room.name}</span>
-    </h1>
-
-    <div id="messages-div" phx-update="stream">
-      <p :for={{dom_id, message} <- @streams.messages} id={dom_id}>
-        {message.user.email}: {message.content}
-      </p>
+    <div class="flex">
+      <div>
+        <div class="w-64 min-h-screen">
+          <h1 class="text-center bg-red-200 text-3xl font-bold">Rooms</h1>
+          
+          <div id="rooms" phx-update="stream">
+            <div :for={{dom_id, room} <- @streams.rooms}>
+              <.link
+                class={[
+                  "hover:bg-blue-600 mr-2",
+                  room.id == @room.id && "bg-red-200"
+                ]}
+                href={~p"/chat/#{room.id}"}
+                id={dom_id}
+              >
+                {room.name}
+              </.link>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <h1 class="text-4xl">
+          ROOM: <span class="text-blue-400">{@room.name}</span>
+        </h1>
+        
+        <div id="messages-div" phx-update="stream">
+          <p :for={{dom_id, message} <- @streams.messages} id={dom_id}>
+            {message.user.email}: {message.content}
+          </p>
+        </div>
+        
+        <.form for={@form} phx-submit="save" phx-change="validate">
+          <.input field={@form[:content]} /> <button type="submit">Send Message</button>
+        </.form>
+      </div>
     </div>
-
-    <.form for={@form} phx-submit="save" phx-change="validate">
-      <.input field={@form[:content]} /> <button type="submit">Send Message</button>
-    </.form>
     """
   end
 
@@ -54,11 +79,11 @@ defmodule ChatWeb.ChatLive do
       |> Map.put("room_id", socket.assigns.room.id)
 
     case Messages.create_message(message_params) do
-      {:ok, _message} ->
+      {:ok, message} ->
         {:noreply,
          socket
          |> assign(:form, to_form(Messages.change_message(%Message{})))
-         |> put_flash(:info, "Message sent!")}
+         |> stream_insert(:messages, message)}
 
       {:error, changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
