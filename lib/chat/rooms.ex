@@ -66,7 +66,7 @@ defmodule Chat.Rooms do
         broadcast({:ok, room}, :room_created)
 
       {:error, _step, reason, _changes_so_far} ->
-        {:error, reason}
+        broadcast({:error, reason}, :room_created)
     end
   end
 

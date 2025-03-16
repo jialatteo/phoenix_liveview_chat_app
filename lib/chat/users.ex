@@ -7,6 +7,7 @@ defmodule Chat.Users do
   alias Chat.Repo
 
   alias Chat.Users.{User, UserToken, UserNotifier}
+  alias Chat.UserRooms.UserRoom
 
   ## Database getters
 
@@ -75,9 +76,19 @@ defmodule Chat.Users do
 
   """
   def register_user(attrs) do
-    %User{}
-    |> User.registration_changeset(attrs)
-    |> Repo.insert()
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:user, User.registration_changeset(%User{}, attrs))
+    |> Ecto.Multi.insert(:user_room, fn %{user: user} ->
+      UserRoom.changeset(%UserRoom{}, %{"user_id" => user.id, "room_id" => 1})
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user}} ->
+        {:ok, user}
+
+      {:error, _step, changeset, _changes} ->
+        {:error, changeset}
+    end
   end
 
   @doc """

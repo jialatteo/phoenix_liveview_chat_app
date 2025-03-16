@@ -10,6 +10,11 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
+alias Chat.Rooms.Room
+
+default_room_changeset = Room.changeset(%Room{}, %{"name" => "general"})
+Chat.Repo.insert(default_room_changeset)
+
 users = [
   %{email: "adam@gmail.com", password: "password1234"},
   %{email: "bob@gmail.com", password: "password1234"}
@@ -18,5 +23,3 @@ users = [
 Enum.each(users, fn user_attrs ->
   Chat.Users.register_user(user_attrs)
 end)
-
-Chat.Rooms.create_room(%{"user_id" => 1, "name" => "general"})
