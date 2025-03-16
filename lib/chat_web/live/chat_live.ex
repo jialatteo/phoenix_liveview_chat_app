@@ -31,7 +31,7 @@ defmodule ChatWeb.ChatLive do
                   "hover:bg-blue-600 mr-2",
                   room.id == @room.id && "bg-red-200"
                 ]}
-                href={~p"/chat/#{room.id}"}
+                navigate={~p"/chat/#{room.id}"}
                 id={dom_id}
               >
                 {room.name}
