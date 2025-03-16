@@ -7,7 +7,12 @@ defmodule ChatWeb.ChatLive do
 
   def mount(params, _session, socket) do
     %{"room_id" => room_id} = params
-    if connected?(socket), do: Chat.Messages.subscribe(room_id)
+
+    if connected?(socket) do
+      Chat.Messages.subscribe(room_id)
+      Chat.Rooms.subscribe()
+    end
+
     message_changeset = Messages.change_message(%Message{})
 
     room_changeset = Rooms.change_room(%Room{})
@@ -72,6 +77,10 @@ defmodule ChatWeb.ChatLive do
     {:noreply, stream_insert(socket, :messages, message)}
   end
 
+  def handle_info({:room_created, room}, socket) do
+    {:noreply, stream_insert(socket, :rooms, room)}
+  end
+
   def handle_event("validate_message", %{"message" => message_params}, socket) do
     changeset = Messages.change_message(%Message{}, message_params)
 
@@ -87,11 +96,10 @@ defmodule ChatWeb.ChatLive do
       |> Map.put("room_id", socket.assigns.current_room.id)
 
     case Messages.create_message(message_params) do
-      {:ok, message} ->
+      {:ok, _message} ->
         {:noreply,
          socket
-         |> assign(:message_form, to_form(Messages.change_message(%Message{})))
-         |> stream_insert(:messages, message)}
+         |> assign(:message_form, to_form(Messages.change_message(%Message{})))}
 
       {:error, changeset} ->
         {:noreply, assign(socket, message_form: to_form(changeset))}
@@ -103,7 +111,7 @@ defmodule ChatWeb.ChatLive do
 
     {:noreply,
      socket
-     |> assign(:form, to_form(changeset, action: :validate))}
+     |> assign(:room_form, to_form(changeset, action: :validate))}
   end
 
   def handle_event("save_room", %{"room" => room_params}, socket) do
@@ -111,11 +119,9 @@ defmodule ChatWeb.ChatLive do
 
     case Rooms.create_room(room_params) do
       {:ok, room} ->
-        IO.puts("okay!")
-
         {:noreply,
          socket
-         |> assign(:form, to_form(Rooms.change_room(%Room{})))
+         |> assign(:room_form, to_form(Rooms.change_room(%Room{})))
          |> put_flash(:info, "Room #{room.name} created")}
 
       {:error, changeset} ->

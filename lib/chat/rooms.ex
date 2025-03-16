@@ -63,7 +63,7 @@ defmodule Chat.Rooms do
     |> Repo.transaction()
     |> case do
       {:ok, %{room: room}} ->
-        {:ok, room}
+        broadcast({:ok, room}, :room_created)
 
       {:error, _step, reason, _changes_so_far} ->
         {:error, reason}
@@ -115,5 +115,16 @@ defmodule Chat.Rooms do
   """
   def change_room(%Room{} = room, attrs \\ %{}) do
     Room.changeset(room, attrs)
+  end
+
+  def subscribe() do
+    Phoenix.PubSub.subscribe(Chat.PubSub, "rooms")
+  end
+
+  defp broadcast({:error, _reason} = error, _event), do: error
+
+  defp broadcast({:ok, room}, event) do
+    Phoenix.PubSub.broadcast(Chat.PubSub, "rooms", {event, room})
+    {:ok, room}
   end
 end
