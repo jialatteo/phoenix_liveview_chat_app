@@ -5,9 +5,9 @@ defmodule ChatWeb.ChatLive do
   alias Chat.Rooms
 
   def mount(params, _session, socket) do
-    if connected?(socket), do: Chat.Messages.subscribe()
-    changeset = Messages.change_message(%Message{})
     %{"room_id" => room_id} = params
+    if connected?(socket), do: Chat.Messages.subscribe(room_id)
+    changeset = Messages.change_message(%Message{})
 
     {:ok,
      socket

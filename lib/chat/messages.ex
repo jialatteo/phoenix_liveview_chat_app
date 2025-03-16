@@ -119,14 +119,14 @@ defmodule Chat.Messages do
     Message.changeset(message, attrs)
   end
 
-  def subscribe do
-    Phoenix.PubSub.subscribe(Chat.PubSub, "messages")
+  def subscribe(id) do
+    Phoenix.PubSub.subscribe(Chat.PubSub, "messages-#{id}")
   end
 
   defp broadcast({:error, _reason} = error, _event), do: error
 
   defp broadcast({:ok, message}, event) do
-    Phoenix.PubSub.broadcast(Chat.PubSub, "messages", {event, message})
+    Phoenix.PubSub.broadcast(Chat.PubSub, "messages-#{message.room_id}", {event, message})
     {:ok, message}
   end
 end
