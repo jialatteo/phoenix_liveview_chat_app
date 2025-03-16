@@ -28,7 +28,6 @@ defmodule ChatWeb.Router do
         {ChatWeb.UserAuth, :mount_current_user}
       ],
       layout: {ChatWeb.Layouts, :sidebar} do
-      live "/chat/new", RoomCreateLive
       live "/chat/:room_id", ChatLive
     end
   end

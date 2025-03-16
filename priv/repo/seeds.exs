@@ -18,3 +18,5 @@ users = [
 Enum.each(users, fn user_attrs ->
   Chat.Users.register_user(user_attrs)
 end)
+
+Chat.Rooms.create_room(%{"user_id" => 1, "name" => "general"})
