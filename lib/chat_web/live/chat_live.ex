@@ -14,7 +14,7 @@ defmodule ChatWeb.ChatLive do
      |> stream(:rooms, Rooms.list_rooms())
      |> stream(:messages, Messages.get_messages_from_room(room_id))
      |> assign(:room, Rooms.get_room!(room_id))
-     |> assign(:form, to_form(changeset))}
+     |> assign(:message_form, to_form(changeset))}
   end
 
   def render(assigns) do
@@ -52,8 +52,8 @@ defmodule ChatWeb.ChatLive do
           </p>
         </div>
         
-        <.form for={@form} phx-submit="save" phx-change="validate">
-          <.input field={@form[:content]} /> <button type="submit">Send Message</button>
+        <.form for={@message_form} phx-submit="save" phx-change="validate">
+          <.input field={@message_form[:content]} /> <button type="submit">Send Message</button>
         </.form>
       </div>
     </div>
@@ -69,7 +69,7 @@ defmodule ChatWeb.ChatLive do
 
     {:noreply,
      socket
-     |> assign(:form, to_form(changeset, action: :validate))}
+     |> assign(:message_form, to_form(changeset, action: :validate))}
   end
 
   def handle_event("save", %{"message" => message_params}, socket) do
@@ -82,11 +82,11 @@ defmodule ChatWeb.ChatLive do
       {:ok, message} ->
         {:noreply,
          socket
-         |> assign(:form, to_form(Messages.change_message(%Message{})))
+         |> assign(:message_form, to_form(Messages.change_message(%Message{})))
          |> stream_insert(:messages, message)}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset))}
+        {:noreply, assign(socket, message_form: to_form(changeset))}
     end
   end
 end
