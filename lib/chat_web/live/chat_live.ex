@@ -32,29 +32,44 @@ defmodule ChatWeb.ChatLive do
   def render(assigns) do
     ~H"""
     <div class="flex">
-      <div class="w-64 ">
-        <h1 class="text-center bg-red-200 text-3xl font-bold">Rooms</h1>
-        
-        <div class="flex min-h-screen flex-col gap-8">
-          <div id="rooms" phx-update="stream">
-            <div :for={{dom_id, room} <- @streams.rooms}>
+      <div class="w-64 bg-[#f2f3f5] min-h-screen flex flex-col justify-between">
+        <div id="rooms" class="text-lg divide-y-2 text-[#69737F]" phx-update="stream">
+          <div class="flex justify-between items-center p-1 px-2 text-2xl">
+            <h1>Rooms</h1>
+            
+            <div class="relative group">
+              <button class="text-5xl pb-1 text-[#8d8f92] hover:text-[#a9abafcb] group">
+                +
+                <div class="absolute left-1/2 transform
+                       -translate-x-1/2  w-max px-2 py-1
+                       text-sm text-white bg-gray-700 rounded
+                       shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                  Add new group
+                </div>
+              </button>
+            </div>
+          </div>
+          
+          <div class="flex flex-col gap-1 p-2">
+            <div :for={{dom_id, room} <- @streams.rooms} class="w-full">
               <.link
                 class={[
-                  "hover:bg-red-50 mr-2",
-                  room.id == @current_room.id && "bg-red-200"
+                  "hover:bg-[#e5e8ec] w-full block p-2 rounded hover:text-black",
+                  room.id == @current_room.id &&
+                    "pointer-events-none bg-[#D4D7DC] text-black"
                 ]}
                 navigate={~p"/chat/#{room.id}"}
                 id={dom_id}
               >
-                {room.name}
+                # {room.name}
               </.link>
             </div>
           </div>
-          
-          <.form for={@room_form} phx-submit="save_room" phx-change="validate_room">
-            <.input field={@room_form[:name]} /> <button type="submit">Create Room</button>
-          </.form>
         </div>
+        
+        <.form for={@room_form} phx-submit="save_room" phx-change="validate_room">
+          <.input field={@room_form[:name]} /> <button type="submit">Create Room</button>
+        </.form>
       </div>
       
       <div>
