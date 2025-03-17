@@ -32,10 +32,10 @@ defmodule ChatWeb.ChatLive do
   def render(assigns) do
     ~H"""
     <div class="flex">
-      <div class="w-64 bg-[#f2f3f5] min-h-screen flex flex-col justify-between">
-        <div id="rooms" class="text-lg divide-y-2 text-[#69737F]" phx-update="stream">
+      <div class="w-64 bg-[#f2f3f5] min-h-screen">
+        <div id="rooms" class="text-lg divide-y-2 text-[#69737F]">
           <div class="flex justify-between items-center p-1 px-2 text-2xl">
-            <h1>Rooms</h1>
+            <h1 class="text-3xl">Rooms</h1>
             
             <div class="relative group">
               <button class="text-5xl pb-1 text-[#8d8f92] hover:text-[#a9abafcb] group">
@@ -43,14 +43,14 @@ defmodule ChatWeb.ChatLive do
                 <div class="absolute left-1/2 transform
                        -translate-x-1/2  w-max px-2 py-1
                        text-sm text-white bg-gray-700 rounded
-                       shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                       shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none">
                   Add new group
                 </div>
               </button>
             </div>
           </div>
           
-          <div class="flex flex-col gap-1 p-2">
+          <div id="rooms" class="flex flex-col gap-1 p-2" phx-update="stream">
             <div :for={{dom_id, room} <- @streams.rooms} class="w-full">
               <.link
                 class={[
@@ -107,7 +107,7 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_event("validate_message", %{"message" => message_params}, socket) do
-    changeset = Messages.change_message(%Message{}, message_params)
+    changeset = Message.changeset(%Message{}, message_params)
 
     {:noreply,
      socket
@@ -132,7 +132,7 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_event("validate_room", %{"room" => room_params}, socket) do
-    changeset = Rooms.change_room(%Room{}, room_params)
+    changeset = Room.changeset(%Room{}, room_params)
 
     {:noreply,
      socket
@@ -147,10 +147,11 @@ defmodule ChatWeb.ChatLive do
         {:noreply,
          socket
          |> assign(:room_form, to_form(Rooms.change_room(%Room{})))
+         |> push_navigate(to: ~p"/chat/#{room.id}")
          |> put_flash(:info, "Room #{room.name} created")}
 
       {:error, changeset} ->
-        {:noreply, socket |> assign(:form, to_form(changeset))}
+        {:noreply, assign(socket, :room_form, to_form(changeset))}
     end
   end
 end

@@ -59,22 +59,23 @@ defmodule Chat.Rooms do
 
   """
   def create_room(%{"user_id" => user_id, "name" => name} \\ %{}) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.insert(:room, Room.changeset(%Room{}, %{"name" => name}))
-    |> Ecto.Multi.insert(:user_room, fn %{room: room} ->
-      UserRoom.changeset(%UserRoom{}, %{
-        "user_id" => user_id,
-        "room_id" => room.id,
-        "is_admin" => true
-      })
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{room: room}} ->
+    multi =
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert(:insert_room, Room.changeset(%Room{}, %{"name" => name}))
+      |> Ecto.Multi.insert(:insert_user_room, fn %{insert_room: room} ->
+        UserRoom.changeset(%UserRoom{}, %{
+          "user_id" => user_id,
+          "room_id" => room.id,
+          "is_admin" => true
+        })
+      end)
+
+    case Repo.transaction(multi) do
+      {:ok, %{insert_room: room}} ->
         broadcast({:ok, room}, :room_created)
 
-      {:error, _step, reason, _changes_so_far} ->
-        broadcast({:error, reason}, :room_created)
+      {:error, _failed_operation_name, changeset, _changes_so_far} ->
+        broadcast({:error, changeset}, :room_created)
     end
   end
 
@@ -129,7 +130,7 @@ defmodule Chat.Rooms do
     Phoenix.PubSub.subscribe(Chat.PubSub, "rooms")
   end
 
-  defp broadcast({:error, _reason} = error, _event), do: error
+  defp broadcast({:error, _changeset} = error, _event), do: error
 
   defp broadcast({:ok, room}, event) do
     Phoenix.PubSub.broadcast(Chat.PubSub, "rooms", {event, room})
