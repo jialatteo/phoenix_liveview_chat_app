@@ -4,6 +4,7 @@ defmodule ChatWeb.UserAuth do
   import Plug.Conn
   import Phoenix.Controller
 
+  alias Chat.UserRooms
   alias Chat.Users
 
   # Make the remember me cookie valid for 60 days.
@@ -171,6 +172,24 @@ defmodule ChatWeb.UserAuth do
       {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
     else
       {:cont, socket}
+    end
+  end
+
+  def on_mount(:ensure_is_member, params, _session, socket) do
+    user_id = socket.assigns.current_user.id
+    %{"room_id" => room_id} = params
+
+    exists? = UserRooms.user_room_exist(%{"room_id" => room_id, "user_id" => user_id})
+
+    if exists? do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> Phoenix.LiveView.put_flash(:error, "You are not a member of this room.")
+        |> Phoenix.LiveView.redirect(to: ~p"/chat/1")
+
+      {:halt, socket}
     end
   end
 
