@@ -32,50 +32,48 @@ defmodule ChatWeb.ChatLive do
   def render(assigns) do
     ~H"""
     <div class="flex">
-      <div class="w-64 bg-[#f2f3f5] min-h-screen">
-        <div id="rooms" class="text-lg divide-y-2 text-[#69737F]">
-          <div class="flex justify-between items-center p-1 px-2 text-2xl">
-            <h1 class="text-3xl">Rooms</h1>
-            
-            <div class="relative group">
-              <button class="text-5xl pb-1 text-[#8d8f92] hover:text-[#a9abafcb] group">
-                +
-                <div class="absolute left-1/2 transform
+      <div class="w-64 bg-[#f2f3f5] text-lg text-[#69737F] min-h-screen">
+        <div class="flex border-b-2 border-gray-300 justify-between items-center p-1 px-2">
+          <h1 class="text-2xl font-semibold ">Rooms</h1>
+          
+          <div class="relative group">
+            <button
+              phx-click={show_modal("my-modal")}
+              class="text-4xl pb-1 text-[#8d8f92] hover:text-[#a9abafcb] group"
+            >
+              +
+              <div class="absolute left-1/2 transform
                        -translate-x-1/2  w-max px-2 py-1
                        text-sm text-white bg-gray-700 rounded
                        shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none">
-                  Add new group
-                </div>
-              </button>
-            </div>
-          </div>
-          
-          <div id="rooms" class="flex flex-col gap-1 p-2" phx-update="stream">
-            <div :for={{dom_id, room} <- @streams.rooms} class="w-full">
-              <.link
-                class={[
-                  "hover:bg-[#e5e8ec] w-full block p-2 rounded hover:text-black",
-                  room.id == @current_room.id &&
-                    "pointer-events-none bg-[#D4D7DC] text-black"
-                ]}
-                navigate={~p"/chat/#{room.id}"}
-                id={dom_id}
-              >
-                # {room.name}
-              </.link>
-            </div>
+                Add new group
+              </div>
+            </button>
           </div>
         </div>
         
-        <.form for={@room_form} phx-submit="save_room" phx-change="validate_room">
-          <.input field={@room_form[:name]} /> <button type="submit">Create Room</button>
-        </.form>
+        <div id="rooms" class="flex flex-col gap-1 p-2" phx-update="stream">
+          <.link
+            :for={{dom_id, room} <- @streams.rooms}
+            class={[
+              "flex items-center gap-2 hover:bg-[#e5e8ec] w-full p-2 rounded hover:text-black",
+              room.id == @current_room.id &&
+                "pointer-events-none bg-[#D4D7DC] text-black"
+            ]}
+            navigate={~p"/chat/#{room.id}"}
+            id={dom_id}
+          >
+            <span class="font-semibold text-gray-500 text-2xl">#</span>
+            <p>{room.name}</p>
+          </.link>
+        </div>
       </div>
       
-      <div>
-        <h1 class="text-4xl">
-          ROOM: <span class="text-blue-400">{@current_room.name}</span>
-        </h1>
+      <div class="w-full">
+        <div class="flex w-full items-center gap-3 pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
+          <span class="text-3xl text-gray-500 font-semibold">#</span>
+          <span class="text-2xl font-semibold pb-1">{@current_room.name}</span>
+        </div>
         
         <div id="messages-div" phx-update="stream">
           <p :for={{dom_id, message} <- @streams.messages} id={dom_id}>
@@ -86,6 +84,12 @@ defmodule ChatWeb.ChatLive do
         <.form for={@message_form} phx-submit="save_message" phx-change="validate_message">
           <.input field={@message_form[:content]} /> <button type="submit">Send Message</button>
         </.form>
+        
+        <.modal id="my-modal">
+          <.form for={@room_form} phx-submit="save_room" phx-change="validate_room">
+            <.input field={@room_form[:name]} /> <button type="submit">Create Room</button>
+          </.form>
+        </.modal>
       </div>
     </div>
     """
