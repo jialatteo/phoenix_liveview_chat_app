@@ -4,6 +4,7 @@ defmodule ChatWeb.ChatLive do
   alias Chat.Messages.Message
   alias Chat.Rooms
   alias Chat.Rooms.Room
+  alias Chat.UserRooms
 
   def mount(params, _session, socket) do
     %{"room_id" => room_id} = params
@@ -19,7 +20,7 @@ defmodule ChatWeb.ChatLive do
 
     {:ok,
      socket
-     |> stream(:rooms, Rooms.list_rooms())
+     |> stream(:rooms, Rooms.list_rooms_of_user(socket.assigns.current_user.id))
      |> stream(:messages, Messages.get_messages_from_room(room_id))
      |> assign(:current_room, Rooms.get_room!(room_id))
      |> assign(:message_form, to_form(message_changeset))
@@ -78,7 +79,14 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_info({:room_created, room}, socket) do
-    {:noreply, stream_insert(socket, :rooms, room)}
+    if UserRooms.user_room_exist(%{
+         "user_id" => socket.assigns.current_user.id,
+         "room_id" => room.id
+       }) do
+      {:noreply, stream_insert(socket, :rooms, room)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("validate_message", %{"message" => message_params}, socket) do

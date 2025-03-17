@@ -21,6 +21,12 @@ defmodule Chat.UserRooms do
     Repo.all(UserRoom)
   end
 
+  def user_room_exist(%{"room_id" => room_id, "user_id" => user_id}) do
+    UserRoom
+    |> where([ur], ur.user_id == ^user_id and ur.room_id == ^room_id)
+    |> Repo.exists?()
+  end
+
   @doc """
   Gets a single user_room.
 

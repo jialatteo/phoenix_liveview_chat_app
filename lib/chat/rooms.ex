@@ -22,6 +22,14 @@ defmodule Chat.Rooms do
     Repo.all(Room)
   end
 
+  def list_rooms_of_user(user_id) do
+    Room
+    |> join(:inner, [r], ur in UserRoom, on: ur.room_id == r.id)
+    |> where([r, ur], ur.user_id == ^user_id)
+    |> select([r], r)
+    |> Repo.all()
+  end
+
   @doc """
   Gets a single room.
 
