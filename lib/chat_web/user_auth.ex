@@ -187,7 +187,7 @@ defmodule ChatWeb.UserAuth do
       socket =
         socket
         |> Phoenix.LiveView.put_flash(:error, "You are not a member of this room.")
-        |> Phoenix.LiveView.redirect(to: ~p"/chat/1")
+        |> Phoenix.LiveView.redirect(to: ~p"/")
 
       {:halt, socket}
     end

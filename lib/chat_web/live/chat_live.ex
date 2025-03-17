@@ -6,6 +6,8 @@ defmodule ChatWeb.ChatLive do
   alias Chat.Rooms.Room
   alias Chat.UserRooms
 
+  on_mount {ChatWeb.UserAuth, :ensure_is_member}
+
   def mount(params, _session, socket) do
     %{"room_id" => room_id} = params
 
