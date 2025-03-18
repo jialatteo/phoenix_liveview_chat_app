@@ -165,10 +165,7 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_info({:message_created, message}, socket) do
-    {:noreply,
-     socket
-     |> stream_insert(:messages, message)
-     |> push_event("scroll-to-bottom", %{})}
+    {:noreply, stream_insert(socket, :messages, message)}
   end
 
   def handle_info({:room_created, room}, socket) do
@@ -197,10 +194,12 @@ defmodule ChatWeb.ChatLive do
       |> Map.put("room_id", socket.assigns.current_room.id)
 
     case Messages.create_message(message_params) do
-      {:ok, _message} ->
+      {:ok, message} ->
         {:noreply,
          socket
-         |> assign(:message_form, to_form(Messages.change_message(%Message{})))}
+         |> assign(:message_form, to_form(Messages.change_message(%Message{})))
+         |> stream_insert(:messages, message)
+         |> push_event("scroll-to-bottom", %{})}
 
       {:error, changeset} ->
         {:noreply, assign(socket, message_form: to_form(changeset))}
