@@ -70,11 +70,13 @@ defmodule Chat.Messages do
     |> Ecto.Multi.run(:create_message, fn repo, %{get_latest_message: latest_message} ->
       is_start_of_seuqence =
         case latest_message do
-          nil -> true
-          message -> message.user_id != attrs["user_id"]
-        end
+          nil ->
+            true
 
-      IO.inspect(is_start_of_seuqence, label: "is_start_of_seuqence")
+          message ->
+            Timex.diff(Timex.now(), message.inserted_at, :minutes) > 10 ||
+              message.user_id != attrs["user_id"]
+        end
 
       changeset =
         %Message{}
