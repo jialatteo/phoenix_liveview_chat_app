@@ -93,7 +93,12 @@ defmodule ChatWeb.ChatLive do
           <span class="text-2xl font-semibold pb-1 truncate">{@current_room.name}</span>
         </div>
         
-        <div id="messages-div" class="-mt-5 pb-4 flex-1 overflow-y-auto " phx-update="stream">
+        <div
+          id="messages-div"
+          phx-hook="ScrollToBottom"
+          class="-mt-5 pb-4 flex-1 overflow-y-auto"
+          phx-update="stream"
+        >
           <div :for={{dom_id, message} <- @streams.messages} class="pl-16 group" id={dom_id}>
             <div :if={message.is_start_of_sequence} class="mt-6 relative">
               <div class="w-11 absolute -left-14 top-1 h-11 -z-10 rounded-full bg-red-400"></div>
@@ -160,7 +165,10 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_info({:message_created, message}, socket) do
-    {:noreply, stream_insert(socket, :messages, message)}
+    {:noreply,
+     socket
+     |> stream_insert(:messages, message)
+     |> push_event("scroll-to-bottom", %{})}
   end
 
   def handle_info({:room_created, room}, socket) do
