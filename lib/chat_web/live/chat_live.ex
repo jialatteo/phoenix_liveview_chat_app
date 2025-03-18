@@ -112,7 +112,7 @@ defmodule ChatWeb.ChatLive do
             </div>
             
             <div class="relative">
-              <p>
+              <p class="break-words">
                 {message.content}
               </p>
               
@@ -132,7 +132,12 @@ defmodule ChatWeb.ChatLive do
           phx-submit="save_message"
           phx-change="validate_message"
         >
-          <.input class="flex-1" input_class="mt-0 bg-gray-50" field={@message_form[:content]} />
+          <.input
+            class="flex-1"
+            placeholder="Write a message..."
+            input_class="mt-0 bg-gray-50"
+            field={@message_form[:content]}
+          />
           <button type="submit">
             <svg
               class="w-8 h-8 fill-gray-600 hover:fill-gray-300"
