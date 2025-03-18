@@ -105,7 +105,7 @@ defmodule ChatWeb.ChatLive do
               
               <p class="font-bold">
                 {message.user.email}
-                <span class="text-xs font-normal text-gray-500">
+                <span class="text-xs font-normal select-none text-gray-500">
                   {format_inserted_at_full(message.inserted_at)}
                 </span>
               </p>
@@ -118,7 +118,7 @@ defmodule ChatWeb.ChatLive do
               
               <p
                 :if={!message.is_start_of_sequence}
-                class="invisible group group-hover:visible absolute top-1 right-full -translate-x-3 text-xs font-normal whitespace-nowrap text-gray-500 pointer-events-none"
+                class="invisible group group-hover:visible absolute top-1 right-full -translate-x-3 text-xs font-normal whitespace-nowrap text-gray-500 pointer-events-none select-none"
               >
                 {format_inserted_at_time_only(message.inserted_at)}
               </p>
