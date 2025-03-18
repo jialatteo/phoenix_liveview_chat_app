@@ -61,13 +61,18 @@ defmodule Chat.Messages do
   """
   def create_message(attrs \\ %{}) do
     Ecto.Multi.new()
-    |> Ecto.Multi.run(:get_latest_message, fn repo, _ ->
-      case repo.one(from m in Message, order_by: [desc: m.inserted_at], limit: 1) do
+    |> Ecto.Multi.run(:get_latest_message_in_room, fn repo, _ ->
+      case repo.one(
+             from m in Message,
+               where: m.room_id == ^attrs["room_id"],
+               order_by: [desc: m.inserted_at],
+               limit: 1
+           ) do
         nil -> {:ok, nil}
         message -> {:ok, message}
       end
     end)
-    |> Ecto.Multi.run(:create_message, fn repo, %{get_latest_message: latest_message} ->
+    |> Ecto.Multi.run(:create_message, fn repo, %{get_latest_message_in_room: latest_message} ->
       is_start_of_seuqence =
         case latest_message do
           nil ->

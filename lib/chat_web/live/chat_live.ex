@@ -45,8 +45,8 @@ defmodule ChatWeb.ChatLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex">
-      <div class="w-64 bg-[#f2f3f5] text-lg text-[#69737F] h-screen">
+    <div class="flex h-screen overflow-x-hidden">
+      <div class="flex flex-col bg-[#f2f3f5] text-lg text-[#69737F]">
         <div class="flex border-b-2 border-gray-300 justify-between items-center p-1 px-2">
           <h1 class="text-2xl font-semibold ">Rooms</h1>
           
@@ -57,7 +57,7 @@ defmodule ChatWeb.ChatLive do
             >
               +
               <div class="absolute left-1/2 transform
-                       -translate-x-1/2  w-max px-2 py-1
+                       -translate-x-1/2 z-10  w-max px-2 py-1
                        text-sm text-white bg-gray-700 rounded
                        shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none">
                 Add new group
@@ -66,11 +66,15 @@ defmodule ChatWeb.ChatLive do
           </div>
         </div>
         
-        <div id="rooms" class="flex flex-col gap-1 p-2" phx-update="stream">
+        <div
+          id="rooms"
+          class="flex-1 flex flex-col w-64 overflow-y-auto overflow-x-hidden gap-1 p-2"
+          phx-update="stream"
+        >
           <.link
             :for={{dom_id, room} <- @streams.rooms}
             class={[
-              "flex items-center gap-2 hover:bg-[#e5e8ec] w-full p-2 rounded hover:text-black",
+              "flex items-center gap-2 hover:bg-[#e5e8ec]  w-full p-2 rounded hover:text-black",
               room.id == @current_room.id &&
                 "pointer-events-none bg-[#D4D7DC] text-black"
             ]}
@@ -78,18 +82,18 @@ defmodule ChatWeb.ChatLive do
             id={dom_id}
           >
             <span class="font-semibold text-gray-500 text-2xl">#</span>
-            <p>{room.name}</p>
+            <p class="truncate">{room.name}</p>
           </.link>
         </div>
       </div>
       
-      <div class="w-full">
+      <div class="w-full flex flex-col overflow-x-hidden">
         <div class="flex w-full items-center gap-3 pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
           <span class="text-3xl text-gray-500 font-semibold">#</span>
-          <span class="text-2xl font-semibold pb-1">{@current_room.name}</span>
+          <span class="text-2xl font-semibold pb-1 truncate">{@current_room.name}</span>
         </div>
         
-        <div id="messages-div" class="-mt-5 mb-2 overflow-y-auto" phx-update="stream">
+        <div id="messages-div" class="-mt-5 mb-2 flex-1 overflow-y-auto " phx-update="stream">
           <div :for={{dom_id, message} <- @streams.messages} class="pl-16 group" id={dom_id}>
             <div :if={message.is_start_of_sequence} class="mt-6 relative">
               <div class="w-11 absolute -left-14 top-1 h-11 -z-10 rounded-full bg-red-400"></div>
