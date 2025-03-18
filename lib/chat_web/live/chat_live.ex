@@ -29,6 +29,12 @@ defmodule ChatWeb.ChatLive do
      |> assign(:room_form, to_form(room_changeset))}
   end
 
+  def format_inserted_at(inserted_at) do
+    inserted_at
+    |> Timex.Timezone.convert("Asia/Singapore")
+    |> Timex.format!("%d/%m/%Y %l:%M%p", :strftime)
+  end
+
   def render(assigns) do
     ~H"""
     <div class="flex">
@@ -78,7 +84,8 @@ defmodule ChatWeb.ChatLive do
         <div id="messages-div" phx-update="stream">
           <div :for={{dom_id, message} <- @streams.messages} class="first:-mt-6" id={dom_id}>
             <p :if={message.is_start_of_sequence} class="mt-6">{message.user.email}:</p>
-             {message.content}
+            
+            <p>{message.content} <span>{format_inserted_at(message.inserted_at)}</span></p>
           </div>
         </div>
         
