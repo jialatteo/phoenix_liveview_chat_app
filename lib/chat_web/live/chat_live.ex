@@ -29,10 +29,18 @@ defmodule ChatWeb.ChatLive do
      |> assign(:room_form, to_form(room_changeset))}
   end
 
-  def format_inserted_at(inserted_at) do
+  def format_inserted_at_full(inserted_at) do
     inserted_at
     |> Timex.Timezone.convert("Asia/Singapore")
-    |> Timex.format!("%d/%m/%Y %l:%M%p", :strftime)
+    |> Timex.format!("%d/%m/%Y %l:%M %p", :strftime)
+    |> String.downcase()
+  end
+
+  def format_inserted_at_time_only(inserted_at) do
+    inserted_at
+    |> Timex.Timezone.convert("Asia/Singapore")
+    |> Timex.format!("%l:%M %p", :strftime)
+    |> String.downcase()
   end
 
   def render(assigns) do
@@ -81,11 +89,31 @@ defmodule ChatWeb.ChatLive do
           <span class="text-2xl font-semibold pb-1">{@current_room.name}</span>
         </div>
         
-        <div id="messages-div" phx-update="stream">
-          <div :for={{dom_id, message} <- @streams.messages} class="first:-mt-6" id={dom_id}>
-            <p :if={message.is_start_of_sequence} class="mt-6">{message.user.email}:</p>
+        <div id="messages-div" class="-mt-5" phx-update="stream">
+          <div :for={{dom_id, message} <- @streams.messages} class="pl-16" id={dom_id}>
+            <div :if={message.is_start_of_sequence} class="mt-6 relative">
+              <div class="w-11 absolute -left-14 top-1 h-11 -z-10 rounded-full bg-red-400"></div>
+              
+              <p class="font-bold">
+                {message.user.email}
+                <span class="text-xs font-normal text-gray-500">
+                  {format_inserted_at_full(message.inserted_at)}
+                </span>
+              </p>
+            </div>
             
-            <p>{message.content} <span>{format_inserted_at(message.inserted_at)}</span></p>
+            <div class="relative">
+              <p>
+                {message.content}
+              </p>
+              
+              <p
+                :if={!message.is_start_of_sequence}
+                class="invisible hover:visible absolute top-1 right-full -translate-x-3 text-xs font-normal whitespace-nowrap text-gray-500"
+              >
+                {format_inserted_at_time_only(message.inserted_at)}
+              </p>
+            </div>
           </div>
         </div>
         
