@@ -90,7 +90,7 @@ defmodule ChatWeb.ChatLive do
         </div>
         
         <div id="messages-div" class="-mt-5" phx-update="stream">
-          <div :for={{dom_id, message} <- @streams.messages} class="pl-16" id={dom_id}>
+          <div :for={{dom_id, message} <- @streams.messages} class="pl-16 group" id={dom_id}>
             <div :if={message.is_start_of_sequence} class="mt-6 relative">
               <div class="w-11 absolute -left-14 top-1 h-11 -z-10 rounded-full bg-red-400"></div>
               
@@ -109,7 +109,7 @@ defmodule ChatWeb.ChatLive do
               
               <p
                 :if={!message.is_start_of_sequence}
-                class="invisible hover:visible absolute top-1 right-full -translate-x-3 text-xs font-normal whitespace-nowrap text-gray-500"
+                class="invisible group group-hover:visible absolute top-1 right-full -translate-x-3 text-xs font-normal whitespace-nowrap text-gray-500 pointer-events-none"
               >
                 {format_inserted_at_time_only(message.inserted_at)}
               </p>
