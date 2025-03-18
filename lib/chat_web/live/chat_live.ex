@@ -76,9 +76,10 @@ defmodule ChatWeb.ChatLive do
         </div>
         
         <div id="messages-div" phx-update="stream">
-          <p :for={{dom_id, message} <- @streams.messages} id={dom_id}>
-            {message.user.email}: {message.content}
-          </p>
+          <div :for={{dom_id, message} <- @streams.messages} class="first:-mt-6" id={dom_id}>
+            <p :if={message.is_start_of_sequence} class="mt-6">{message.user.email}:</p>
+             {message.content}
+          </div>
         </div>
         
         <.form for={@message_form} phx-submit="save_message" phx-change="validate_message">

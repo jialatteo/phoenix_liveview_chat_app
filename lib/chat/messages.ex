@@ -60,15 +60,39 @@ defmodule Chat.Messages do
 
   """
   def create_message(attrs \\ %{}) do
-    %Message{}
-    |> Message.changeset(attrs)
-    |> Repo.insert()
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:get_latest_message, fn repo, _ ->
+      case repo.one(from m in Message, order_by: [desc: m.inserted_at], limit: 1) do
+        nil -> {:ok, nil}
+        message -> {:ok, message}
+      end
+    end)
+    |> Ecto.Multi.run(:create_message, fn repo, %{get_latest_message: latest_message} ->
+      is_start_of_seuqence =
+        case latest_message do
+          nil -> true
+          message -> message.user_id != attrs["user_id"]
+        end
+
+      IO.inspect(is_start_of_seuqence, label: "is_start_of_seuqence")
+
+      changeset =
+        %Message{}
+        |> Message.changeset(attrs)
+        |> Ecto.Changeset.put_change(:is_start_of_sequence, is_start_of_seuqence)
+
+      case repo.insert(changeset) do
+        {:ok, message} -> {:ok, message}
+        error -> error
+      end
+    end)
+    |> Repo.transaction()
     |> case do
-      {:ok, message} ->
+      {:ok, %{create_message: message}} ->
         broadcast({:ok, message |> Repo.preload(:user)}, :message_created)
 
-      error ->
-        broadcast(error, :message_created)
+      {:error, _failed_operation_name, changeset, _changes_so_far} ->
+        broadcast({:error, changeset}, :message_created)
     end
   end
 
