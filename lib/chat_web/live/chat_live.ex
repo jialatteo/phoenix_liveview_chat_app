@@ -127,7 +127,7 @@ defmodule ChatWeb.ChatLive do
         </div>
         
         <.form
-          class="px-2 pb-4 bg-white flex gap-2 sticky bottom-0 items-center"
+          class="px-2 pb-4 bg-white flex gap-2 sticky bottom-0"
           for={@message_form}
           phx-submit="save_message"
           phx-change="validate_message"
@@ -138,7 +138,7 @@ defmodule ChatWeb.ChatLive do
             input_class="mt-0 bg-gray-50"
             field={@message_form[:content]}
           />
-          <button type="submit">
+          <button type="submit" class="self-start pt-1">
             <svg
               class="w-8 h-8 fill-gray-600 hover:fill-gray-300"
               viewBox="0 0 28 28"
