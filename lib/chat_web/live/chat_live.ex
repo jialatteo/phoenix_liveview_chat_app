@@ -57,7 +57,7 @@ defmodule ChatWeb.ChatLive do
             >
               +
               <div class="absolute left-1/2 transform
-                       -translate-x-1/2 z-10  w-max px-2 py-1
+                       -translate-x-1/2 z-20  w-max px-2 py-1
                        text-sm text-white bg-gray-700 rounded
                        shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none">
                 Add new group
@@ -88,12 +88,12 @@ defmodule ChatWeb.ChatLive do
       </div>
       
       <div class="w-full flex flex-col overflow-x-hidden">
-        <div class="flex w-full items-center gap-3 pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
+        <div class="flex z-10 bg-white w-full items-center gap-3 pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
           <span class="text-3xl text-gray-500 font-semibold">#</span>
           <span class="text-2xl font-semibold pb-1 truncate">{@current_room.name}</span>
         </div>
         
-        <div id="messages-div" class="-mt-5 mb-2 flex-1 overflow-y-auto " phx-update="stream">
+        <div id="messages-div" class="-mt-5 pb-4 flex-1 overflow-y-auto " phx-update="stream">
           <div :for={{dom_id, message} <- @streams.messages} class="pl-16 group" id={dom_id}>
             <div :if={message.is_start_of_sequence} class="mt-6 relative">
               <div class="w-11 absolute -left-14 top-1 h-11 -z-10 rounded-full bg-red-400"></div>
