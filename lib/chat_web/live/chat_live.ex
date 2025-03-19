@@ -379,7 +379,7 @@ defmodule ChatWeb.ChatLive do
      |> assign(:invite_users_form, to_form(updated_filters))
      |> stream(
        :filtered_users,
-       Users.filter_invited_users(updated_filters, socket.assigns.current_user),
+       Users.filter_invited_users(updated_filters, socket.assigns.current_room.id),
        reset: true
      )}
   end

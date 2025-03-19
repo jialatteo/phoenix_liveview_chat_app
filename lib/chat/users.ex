@@ -11,19 +11,19 @@ defmodule Chat.Users do
 
   def filter_invited_users(%{"search" => ""}, _), do: []
 
-  def filter_invited_users(filter, current_user) do
+  def filter_invited_users(filter, current_room_id) do
     search = String.trim_leading(filter["search"])
 
     selected_user_ids =
-      [
-        current_user | filter["selected_users"]
-      ]
+      filter["selected_users"]
       |> List.wrap()
       |> Enum.map(fn user -> user.id end)
 
     User
     |> where([u], ilike(u.email, ^"#{search}%"))
     |> where([u], u.id not in ^selected_user_ids)
+    |> join(:left, [u], ur in UserRoom, on: ur.user_id == u.id and ur.room_id == ^current_room_id)
+    |> where([u, ur], is_nil(ur.id))
     |> Repo.all()
   end
 
