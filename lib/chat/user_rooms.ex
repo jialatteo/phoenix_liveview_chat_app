@@ -27,6 +27,33 @@ defmodule Chat.UserRooms do
     |> Repo.exists?()
   end
 
+  def get_users_in_room(room_id) do
+    UserRoom
+    |> where([ur], ur.room_id == ^room_id)
+    |> preload(:user)
+    |> Repo.all()
+    |> Enum.map(& &1.user)
+  end
+
+  def add_users_to_room(users, room_id) do
+    users
+    |> Enum.map(fn user ->
+      %UserRoom{
+        user_id: user.id,
+        room_id: room_id
+      }
+    end)
+    |> Enum.each(fn user_room ->
+      case Repo.insert(user_room) do
+        {:ok, _user_room} ->
+          :ok
+
+        {:error, changeset} ->
+          IO.inspect(changeset.errors, label: "Failed to insert UserRoom")
+      end
+    end)
+  end
+
   @doc """
   Gets a single user_room.
 

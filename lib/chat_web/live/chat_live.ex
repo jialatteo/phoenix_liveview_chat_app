@@ -25,6 +25,7 @@ defmodule ChatWeb.ChatLive do
      socket
      |> stream(:rooms, Rooms.list_rooms_of_user(socket.assigns.current_user.id))
      |> stream(:messages, Messages.get_messages_from_room(room_id))
+     |> stream(:current_room_users, UserRooms.get_users_in_room(room_id))
      |> assign(:current_room, Rooms.get_room!(room_id))
      |> assign(:message_form, to_form(message_changeset))
      |> assign(:room_form, to_form(room_changeset))
@@ -97,6 +98,25 @@ defmodule ChatWeb.ChatLive do
           <div class="flex items-center gap-2">
             <span class="text-3xl text-gray-500 font-semibold">#</span>
             <span class="text-2xl font-semibold pb-1 truncate">{@current_room.name}</span>
+            <button phx-click={show_modal("room-info-modal")}>
+              <svg
+                class="w-5 h-5 hover:fill-gray-500"
+                version="1.1"
+                id="Capa_1"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 416.979 416.979"
+                xml:space="preserve"
+              >
+                <g>
+                  <path d="M356.004,61.156c-81.37-81.47-213.377-81.551-294.848-0.182c-81.47,81.371-81.552,213.379-0.181,294.85
+    c81.369,81.47,213.378,81.551,294.849,0.181C437.293,274.636,437.375,142.626,356.004,61.156z M237.6,340.786
+    c0,3.217-2.607,5.822-5.822,5.822h-46.576c-3.215,0-5.822-2.605-5.822-5.822V167.885c0-3.217,2.607-5.822,5.822-5.822h46.576
+    c3.215,0,5.822,2.604,5.822,5.822V340.786z M208.49,137.901c-18.618,0-33.766-15.146-33.766-33.765
+    c0-18.617,15.147-33.766,33.766-33.766c18.619,0,33.766,15.148,33.766,33.766C242.256,122.755,227.107,137.901,208.49,137.901z" />
+                </g>
+              </svg>
+            </button>
           </div>
           
           <button
@@ -106,6 +126,19 @@ defmodule ChatWeb.ChatLive do
             + Add members
           </button>
         </div>
+        
+        <.modal id="room-info-modal">
+          <p class="text-lg font-semibold border-b-2">Members:</p>
+          
+          <div class="max-h-80 overflow-y-auto">
+            <p :for={{dom_id, current_room_user} <- @streams.current_room_users} id={dom_id}>
+              {current_room_user.email}
+              <span :if={current_room_user.id == @current_user.id} class="font-bold">
+                (you)
+              </span>
+            </p>
+          </div>
+        </.modal>
         
         <.modal id="add-members-modal">
           <div class="flex gap-2 mb-3 flex-wrap">
@@ -143,7 +176,7 @@ defmodule ChatWeb.ChatLive do
           </div>
           
           <.form
-            phx-submit="filter_users"
+            phx-submit="add-members"
             class="relative"
             for={@invite_users_form}
             phx-change="filter_users"
@@ -174,9 +207,9 @@ defmodule ChatWeb.ChatLive do
             
             <div class="flex mt-8">
               <button
-                phx-click={hide_modal("add-members-modal")}
-                class="ml-auto p-2 rounded bg-gray-700 hover:bg-gray-900 text-white"
+                class="ml-auto p-2 rounded bg-gray-700 disabled:cursor-not-allowed disabled:bg-gray-200 hover:bg-gray-900 text-white"
                 type="submit"
+                disabled={length(@invite_users_form.params["selected_users"] || []) == 0}
               >
                 Add members
               </button>
@@ -387,7 +420,21 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_event("add-members", _, socket) do
-    hide_modal("add-members-modal")
-    {:noreply, socket}
+    current_room = socket.assigns.current_room
+    selected_users = socket.assigns.invite_users_form.params["selected_users"]
+    UserRooms.add_users_to_room(selected_users, current_room.id)
+
+    selected_users
+    |> Enum.each(fn user ->
+      socket = stream_insert(socket, :current_room_users, user)
+    end)
+
+    {:noreply,
+     socket
+     |> put_flash(
+       :info,
+       "Added to room #{current_room.name}!"
+     )
+     |> push_navigate(to: ~p"/chat/#{current_room.id}")}
   end
 end
