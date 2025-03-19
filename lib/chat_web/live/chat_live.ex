@@ -191,6 +191,18 @@ defmodule ChatWeb.ChatLive do
               input_class="rounded-b-none"
             />
             <ul
+              :if={
+                length(@streams.filtered_users.inserts) == 0 &&
+                  @invite_users_form.params["search"] != ""
+              }
+              class="max-h-60 w-full border border-t-0 border-gray-300 absolute bg-white overflow-y-auto text-sm text-gray-700"
+            >
+              <li>
+                No users found
+              </li>
+            </ul>
+            
+            <ul
               :if={length(@streams.filtered_users.inserts) > 0}
               class="max-h-60 w-full border border-t-0 border-gray-300 absolute bg-white overflow-y-auto text-sm text-gray-700"
             >
