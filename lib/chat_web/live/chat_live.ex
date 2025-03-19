@@ -95,9 +95,9 @@ defmodule ChatWeb.ChatLive do
       
       <div class="w-full flex flex-col overflow-x-hidden">
         <div class="flex z-10 bg-white w-full items-center justify-between pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
-          <div class="flex items-center gap-2">
+          <div class="flex w-full items-center gap-2">
             <span class="text-3xl text-gray-500 font-semibold">#</span>
-            <span class="text-2xl font-semibold pb-1 truncate">{@current_room.name}</span>
+            <span class="text-2xl font-semibold pb-1 truncate flex-grow">{@current_room.name}</span>
             <button phx-click={show_modal("room-info-modal")}>
               <svg
                 class="w-5 h-5 hover:fill-gray-500"
@@ -117,14 +117,14 @@ defmodule ChatWeb.ChatLive do
                 </g>
               </svg>
             </button>
+            
+            <button
+              phx-click={show_modal("add-members-modal")}
+              class="flex-shrink-0 ml-auto bg-gray-700 text-white hover:bg-gray-800 text-sm rounded p-1 px-2 mr-2"
+            >
+              + Add members
+            </button>
           </div>
-          
-          <button
-            phx-click={show_modal("add-members-modal")}
-            class="bg-gray-700 text-white hover:bg-gray-800 text-sm rounded p-1 px-2 mr-2"
-          >
-            + Add members
-          </button>
         </div>
         
         <.modal id="room-info-modal">
