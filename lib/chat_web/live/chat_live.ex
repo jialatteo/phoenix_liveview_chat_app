@@ -309,7 +309,11 @@ defmodule ChatWeb.ChatLive do
     {:noreply,
      socket
      |> assign(:invite_users_form, to_form(updated_filters))
-     |> stream(:filtered_users, Users.filter_invited_users(updated_filters), reset: true)}
+     |> stream(
+       :filtered_users,
+       Users.filter_invited_users(updated_filters, socket.assigns.current_user),
+       reset: true
+     )}
   end
 
   def handle_event("select_user", %{"id" => user_id}, socket) do
@@ -340,6 +344,10 @@ defmodule ChatWeb.ChatLive do
     {:noreply,
      socket
      |> assign(:invite_users_form, to_form(updated_filters))
-     |> stream(:filtered_users, Users.filter_invited_users(updated_filters), reset: true)}
+     |> stream(
+       :filtered_users,
+       Users.filter_invited_users(updated_filters, socket.assigns.current_user),
+       reset: true
+     )}
   end
 end

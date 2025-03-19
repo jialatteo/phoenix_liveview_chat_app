@@ -9,13 +9,15 @@ defmodule Chat.Users do
   alias Chat.Users.{User, UserToken, UserNotifier}
   alias Chat.UserRooms.UserRoom
 
-  def filter_invited_users(%{"search" => ""}), do: []
+  def filter_invited_users(%{"search" => ""}, _), do: []
 
-  def filter_invited_users(filter) do
+  def filter_invited_users(filter, current_user) do
     search = String.trim_leading(filter["search"])
 
     selected_user_ids =
-      filter["selected_users"]
+      [
+        current_user | filter["selected_users"]
+      ]
       |> List.wrap()
       |> Enum.map(fn user -> user.id end)
 
