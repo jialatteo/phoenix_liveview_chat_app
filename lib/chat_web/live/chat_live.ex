@@ -5,6 +5,7 @@ defmodule ChatWeb.ChatLive do
   alias Chat.Rooms
   alias Chat.Rooms.Room
   alias Chat.UserRooms
+  alias Chat.Users
 
   on_mount {ChatWeb.UserAuth, :ensure_is_member}
 
@@ -26,7 +27,9 @@ defmodule ChatWeb.ChatLive do
      |> stream(:messages, Messages.get_messages_from_room(room_id))
      |> assign(:current_room, Rooms.get_room!(room_id))
      |> assign(:message_form, to_form(message_changeset))
-     |> assign(:room_form, to_form(room_changeset))}
+     |> assign(:room_form, to_form(room_changeset))
+     |> assign(:invite_users_form, to_form(%{"selected_users" => [], "search" => ""}))
+     |> stream(:filtered_users, [], reset: true)}
   end
 
   def format_inserted_at_full(inserted_at) do
@@ -91,6 +94,66 @@ defmodule ChatWeb.ChatLive do
         <div class="flex z-10 bg-white w-full items-center gap-3 pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
           <span class="text-3xl text-gray-500 font-semibold">#</span>
           <span class="text-2xl font-semibold pb-1 truncate">{@current_room.name}</span>
+        </div>
+        
+        <div class="relative p-4">
+          <div class="flex gap-2">
+            <div
+              :for={selected_user <- @invite_users_form.params["selected_users"]}
+              class="bg-gray-200 p-1 pl-2 text-sm rounded-full inline-flex gap-1 items-center"
+            >
+              <p>
+                {selected_user.email}
+              </p>
+              
+              <button
+                phx-value-id={selected_user.id}
+                phx-click="remove_selected_user"
+                class="rounded-full font-bold group text-lg hover:bg-gray-100 p-2 bg-gray-50"
+              >
+                <svg
+                  class="h-[10px] w-[10px] fill-gray-400 group-hover:fill-black"
+                  version="1.1"
+                  id="Capa_1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                  viewBox="0 0 460.775 460.775"
+                  xml:space="preserve"
+                >
+                  <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55
+    c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55
+    c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505
+    c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55
+    l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719
+    c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <.form phx-submit="filter_users" for={@invite_users_form} phx-change="filter_users">
+            <.input
+              type="text"
+              list="filtered-users-list"
+              field={@invite_users_form[:search]}
+              placeholder="Enter user here..."
+              autocomplete="off"
+              phx-debounce="200"
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </.form>
+          
+          <ul class="max-h-60 absolute left-0 mx-4 bg-white overflow-y-auto text-sm text-gray-700">
+            <li
+              :for={{dom_id, filtered_user} <- @streams.filtered_users}
+              id={dom_id}
+              phx-click="select_user"
+              phx-value-id={filtered_user.id}
+              class="px-4 py-2 cursor-pointer hover:bg-indigo-100"
+            >
+              {filtered_user.email}
+            </li>
+          </ul>
         </div>
         
         <div
@@ -161,7 +224,8 @@ defmodule ChatWeb.ChatLive do
         
         <.modal id="my-modal">
           <.form for={@room_form} phx-submit="save_room" phx-change="validate_room">
-            <.input field={@room_form[:name]} /> <button type="submit">Create Room</button>
+            <.input label="Room name" field={@room_form[:name]} />
+            <button type="submit">Create Room</button>
           </.form>
         </.modal>
       </div>
@@ -233,5 +297,56 @@ defmodule ChatWeb.ChatLive do
       {:error, changeset} ->
         {:noreply, assign(socket, :room_form, to_form(changeset))}
     end
+  end
+
+  def handle_event("filter_users", %{"search" => search}, socket) do
+    updated_map =
+      %{
+        "selected_users" => socket.assigns.invite_users_form.params["selected_users"],
+        "search" => search
+      }
+
+    IO.inspect(updated_map, label: "updated_map")
+
+    {:noreply,
+     socket
+     |> assign(:invite_users_form, to_form(updated_map))
+     |> stream(:filtered_users, Users.filter_invited_users(updated_map), reset: true)}
+  end
+
+  def handle_event("select_user", %{"id" => user_id}, socket) do
+    selected_user = Users.get_user!(user_id)
+
+    IO.inspect(socket.assigns.invite_users_form, label: "before updated form")
+
+    updated_selected_users =
+      socket.assigns.invite_users_form.params["selected_users"] ++ [selected_user]
+
+    updated_form = to_form(%{"selected_users" => updated_selected_users, "search" => ""})
+
+    {:noreply,
+     socket
+     |> assign(:invite_users_form, updated_form)}
+  end
+
+  def handle_event("remove_selected_user", %{"id" => user_id}, socket) do
+    user_id = String.to_integer(user_id)
+
+    updated_selected_users =
+      Enum.reject(socket.assigns.invite_users_form.params["selected_users"], fn user ->
+        user.id == user_id
+      end)
+
+    IO.inspect(updated_selected_users, label: "after")
+
+    updated_form =
+      to_form(%{
+        "selected_users" => updated_selected_users,
+        "search" => socket.assigns.invite_users_form.params["search"]
+      })
+
+    {:noreply,
+     socket
+     |> assign(:invite_users_form, updated_form)}
   end
 end

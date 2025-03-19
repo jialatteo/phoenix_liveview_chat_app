@@ -9,6 +9,16 @@ defmodule Chat.Users do
   alias Chat.Users.{User, UserToken, UserNotifier}
   alias Chat.UserRooms.UserRoom
 
+  def filter_invited_users(%{"search" => ""}), do: []
+
+  def filter_invited_users(filter) do
+    search = String.trim_leading(filter["search"])
+
+    User
+    |> where([u], ilike(u.email, ^"#{search}%"))
+    |> Repo.all()
+  end
+
   ## Database getters
 
   @doc """
