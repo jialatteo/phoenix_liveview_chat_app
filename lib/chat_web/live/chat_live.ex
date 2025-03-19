@@ -300,24 +300,20 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_event("filter_users", %{"search" => search}, socket) do
-    updated_map =
+    updated_filters =
       %{
         "selected_users" => socket.assigns.invite_users_form.params["selected_users"],
         "search" => search
       }
 
-    IO.inspect(updated_map, label: "updated_map")
-
     {:noreply,
      socket
-     |> assign(:invite_users_form, to_form(updated_map))
-     |> stream(:filtered_users, Users.filter_invited_users(updated_map), reset: true)}
+     |> assign(:invite_users_form, to_form(updated_filters))
+     |> stream(:filtered_users, Users.filter_invited_users(updated_filters), reset: true)}
   end
 
   def handle_event("select_user", %{"id" => user_id}, socket) do
     selected_user = Users.get_user!(user_id)
-
-    IO.inspect(socket.assigns.invite_users_form, label: "before updated form")
 
     updated_selected_users =
       socket.assigns.invite_users_form.params["selected_users"] ++ [selected_user]
@@ -332,21 +328,18 @@ defmodule ChatWeb.ChatLive do
   def handle_event("remove_selected_user", %{"id" => user_id}, socket) do
     user_id = String.to_integer(user_id)
 
-    updated_selected_users =
-      Enum.reject(socket.assigns.invite_users_form.params["selected_users"], fn user ->
-        user.id == user_id
-      end)
-
-    IO.inspect(updated_selected_users, label: "after")
-
-    updated_form =
-      to_form(%{
-        "selected_users" => updated_selected_users,
+    updated_filters =
+      %{
+        "selected_users" =>
+          Enum.reject(socket.assigns.invite_users_form.params["selected_users"], fn user ->
+            user.id == user_id
+          end),
         "search" => socket.assigns.invite_users_form.params["search"]
-      })
+      }
 
     {:noreply,
      socket
-     |> assign(:invite_users_form, updated_form)}
+     |> assign(:invite_users_form, to_form(updated_filters))
+     |> stream(:filtered_users, Users.filter_invited_users(updated_filters), reset: true)}
   end
 end

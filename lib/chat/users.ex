@@ -14,8 +14,14 @@ defmodule Chat.Users do
   def filter_invited_users(filter) do
     search = String.trim_leading(filter["search"])
 
+    selected_user_ids =
+      filter["selected_users"]
+      |> List.wrap()
+      |> Enum.map(fn user -> user.id end)
+
     User
     |> where([u], ilike(u.email, ^"#{search}%"))
+    |> where([u], u.id not in ^selected_user_ids)
     |> Repo.all()
   end
 
