@@ -47,6 +47,8 @@ defmodule ChatWeb.ChatLive do
   end
 
   def render(assigns) do
+    IO.inspect(assigns.streams.filtered_users, label: "fuck this bruh i fucking htae thi")
+
     ~H"""
     <div class="flex h-screen overflow-x-hidden">
       <div class="flex flex-col bg-[#f2f3f5] text-lg text-[#69737F]">
@@ -55,7 +57,7 @@ defmodule ChatWeb.ChatLive do
           
           <div class="relative group">
             <button
-              phx-click={show_modal("my-modal")}
+              phx-click={show_modal("create-room-modal")}
               class="text-4xl pb-1 text-[#8d8f92] hover:text-[#a9abafcb] group"
             >
               +
@@ -63,7 +65,7 @@ defmodule ChatWeb.ChatLive do
                        -translate-x-1/2 z-20  w-max px-2 py-1
                        text-sm text-white bg-gray-700 rounded
                        shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none">
-                Add new group
+                Add new room
               </div>
             </button>
           </div>
@@ -91,13 +93,22 @@ defmodule ChatWeb.ChatLive do
       </div>
       
       <div class="w-full flex flex-col overflow-x-hidden">
-        <div class="flex z-10 bg-white w-full items-center gap-3 pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
-          <span class="text-3xl text-gray-500 font-semibold">#</span>
-          <span class="text-2xl font-semibold pb-1 truncate">{@current_room.name}</span>
+        <div class="flex z-10 bg-white w-full items-center justify-between pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
+          <div class="flex items-center gap-2">
+            <span class="text-3xl text-gray-500 font-semibold">#</span>
+            <span class="text-2xl font-semibold pb-1 truncate">{@current_room.name}</span>
+          </div>
+          
+          <button
+            phx-click={show_modal("add-members-modal")}
+            class="bg-gray-700 text-white hover:bg-gray-800 text-sm rounded p-1 px-2 mr-2"
+          >
+            + Add members
+          </button>
         </div>
         
-        <div class="relative p-4">
-          <div class="flex gap-2">
+        <.modal id="add-members-modal">
+          <div class="flex gap-2 mb-3 flex-wrap">
             <div
               :for={selected_user <- @invite_users_form.params["selected_users"]}
               class="bg-gray-200 p-1 pl-2 text-sm rounded-full inline-flex gap-1 items-center"
@@ -131,7 +142,12 @@ defmodule ChatWeb.ChatLive do
             </div>
           </div>
           
-          <.form phx-submit="filter_users" for={@invite_users_form} phx-change="filter_users">
+          <.form
+            phx-submit="filter_users"
+            class="relative"
+            for={@invite_users_form}
+            phx-change="filter_users"
+          >
             <.input
               type="text"
               list="filtered-users-list"
@@ -139,22 +155,34 @@ defmodule ChatWeb.ChatLive do
               placeholder="Enter user here..."
               autocomplete="off"
               phx-debounce="200"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              input_class="rounded-b-none"
             />
-          </.form>
-          
-          <ul class="max-h-60 absolute left-0 mx-4 bg-white overflow-y-auto text-sm text-gray-700">
-            <li
-              :for={{dom_id, filtered_user} <- @streams.filtered_users}
-              id={dom_id}
-              phx-click="select_user"
-              phx-value-id={filtered_user.id}
-              class="px-4 py-2 cursor-pointer hover:bg-indigo-100"
+            <ul
+              :if={length(@streams.filtered_users.inserts) > 0}
+              class="max-h-60 w-full border border-t-0 border-gray-300 absolute bg-white overflow-y-auto text-sm text-gray-700"
             >
-              {filtered_user.email}
-            </li>
-          </ul>
-        </div>
+              <li
+                :for={{dom_id, filtered_user} <- @streams.filtered_users}
+                id={dom_id}
+                phx-click="select_user"
+                phx-value-id={filtered_user.id}
+                class="py-2 w-full cursor-pointer hover:bg-indigo-100"
+              >
+                {filtered_user.email}
+              </li>
+            </ul>
+            
+            <div class="flex mt-8">
+              <button
+                phx-click={hide_modal("add-members-modal")}
+                class="ml-auto p-2 rounded bg-gray-700 hover:bg-gray-900 text-white"
+                type="submit"
+              >
+                Add members
+              </button>
+            </div>
+          </.form>
+        </.modal>
         
         <div
           id="messages-div"
@@ -222,10 +250,17 @@ defmodule ChatWeb.ChatLive do
           </button>
         </.form>
         
-        <.modal id="my-modal">
+        <.modal id="create-room-modal">
           <.form for={@room_form} phx-submit="save_room" phx-change="validate_room">
             <.input label="Room name" field={@room_form[:name]} />
-            <button type="submit">Create Room</button>
+            <div class="flex mt-8">
+              <button
+                class="ml-auto p-2 rounded bg-gray-700 hover:bg-gray-900 text-white"
+                type="submit"
+              >
+                Create Room
+              </button>
+            </div>
           </.form>
         </.modal>
       </div>
@@ -349,5 +384,10 @@ defmodule ChatWeb.ChatLive do
        Users.filter_invited_users(updated_filters, socket.assigns.current_user),
        reset: true
      )}
+  end
+
+  def handle_event("add-members", _, socket) do
+    hide_modal("add-members-modal")
+    {:noreply, socket}
   end
 end
