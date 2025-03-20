@@ -5,8 +5,8 @@ defmodule Chat.UserRooms do
 
   import Ecto.Query, warn: false
   alias Chat.Repo
-
   alias Chat.UserRooms.UserRoom
+  alias Chat.Messages
 
   @doc """
   Returns the list of users_rooms.
@@ -53,7 +53,23 @@ defmodule Chat.UserRooms do
             Repo.delete_all(from(r in Chat.Rooms.Room, where: r.id == ^room_id))
           end
 
-          broadcast({:ok, user_room}, :room_removed_user)
+          message_params = %{
+            "user_id" => user_id,
+            "room_id" => room_id,
+            "is_action" => true,
+            "content" => "has left the room."
+          }
+
+          case Messages.create_message(message_params) do
+            {:ok, message} ->
+              broadcast(
+                {:ok, %{"message" => message, "user_room" => user_room}, :room_removed_user}
+              )
+
+            {:error, changeset} ->
+              IO.inspect(changeset, label: "Error creating message")
+              Repo.rollback(:message_creation_failed)
+          end
         end)
     end
   end
@@ -182,6 +198,8 @@ defmodule Chat.UserRooms do
   end
 
   defp broadcast({:ok, user_room}, :room_added_user) do
+    IO.inspect("broadcasting to topic room-#{user_room.room_id}")
+
     Phoenix.PubSub.broadcast(
       Chat.PubSub,
       "room-#{user_room.room_id}",
@@ -191,13 +209,13 @@ defmodule Chat.UserRooms do
     {:ok, user_room.user_id}
   end
 
-  defp broadcast({:ok, user_room}, :room_removed_user) do
+  defp broadcast({:ok, %{"message" => message, "user_room" => user_room}, :room_removed_user}) do
     Phoenix.PubSub.broadcast(
       Chat.PubSub,
       "room-#{user_room.room_id}",
-      {:room_removed_user, user_room.user_id}
+      {:room_removed_user, user_room.user_id, message}
     )
 
-    {:ok, user_room.user_id}
+    {:ok, user_room.user_id, message}
   end
 end

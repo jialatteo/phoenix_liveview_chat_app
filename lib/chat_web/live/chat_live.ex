@@ -16,6 +16,8 @@ defmodule ChatWeb.ChatLive do
     %{"room_id" => room_id} = params
     current_user = socket.assigns.current_user
 
+    IO.puts("#{current_user.email} is subscribed to topic: :room_id #{room_id}")
+
     if connected?(socket) do
       Chat.UserRooms.subscribe({:user_id, current_user.id})
       Chat.UserRooms.subscribe({:room_id, room_id})
@@ -391,7 +393,6 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_info({:room_added_user, user_id}, socket) do
-    IO.puts("RECEIVEDdddddddddddddddddddd")
     user = Users.get_user!(user_id)
 
     {:noreply,
@@ -409,27 +410,13 @@ defmodule ChatWeb.ChatLive do
      |> put_flash(:info, "You have been added to room #{room.name}")}
   end
 
-  def handle_info({:room_removed_user, user_id}, socket) do
-    current_room = socket.assigns.current_room
+  def handle_info({:room_removed_user, user_id, message}, socket) do
     user = Users.get_user!(user_id)
 
-    message_params = %{
-      "user_id" => user_id,
-      "room_id" => current_room.id,
-      "is_action" => true,
-      "content" => @leave_room_message
-    }
-
-    case Messages.create_message(message_params) do
-      {:ok, message} ->
-        {:noreply,
-         socket
-         |> stream_delete(:current_room_users, user)
-         |> stream_insert(:messages, message)}
-
-      {:error, changeset} ->
-        IO.inspect(changeset, label: "error")
-    end
+    {:noreply,
+     socket
+     |> stream_insert(:messages, message)
+     |> stream_delete(:current_room_users, user)}
   end
 
   def handle_event("validate_message", %{"message" => message_params}, socket) do
