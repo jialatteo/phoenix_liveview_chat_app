@@ -43,8 +43,18 @@ defmodule Chat.UserRooms do
         {:error, :not_found}
 
       _ ->
-        Repo.delete(user_room)
-        broadcast({:ok, user_room}, :room_removed_user)
+        Repo.transaction(fn ->
+          Repo.delete!(user_room)
+
+          remaining_users =
+            Repo.aggregate(from(ur in UserRoom, where: ur.room_id == ^room_id), :count, :id)
+
+          if remaining_users == 0 do
+            Repo.delete_all(from(r in Chat.Rooms.Room, where: r.id == ^room_id))
+          end
+
+          broadcast({:ok, user_room}, :room_removed_user)
+        end)
     end
   end
 
