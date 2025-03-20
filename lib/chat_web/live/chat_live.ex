@@ -16,8 +16,6 @@ defmodule ChatWeb.ChatLive do
     %{"room_id" => room_id} = params
     current_user = socket.assigns.current_user
 
-    IO.puts("#{current_user.email} is subscribed to topic: :room_id #{room_id}")
-
     if connected?(socket) do
       Chat.UserRooms.subscribe({:user_id, current_user.id})
       Chat.UserRooms.subscribe({:room_id, room_id})

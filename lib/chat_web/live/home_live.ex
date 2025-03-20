@@ -1,7 +1,5 @@
 defmodule ChatWeb.HomeLive do
   use ChatWeb, :live_view
-  alias Chat.Messages
-  alias Chat.Messages.Message
   alias Chat.Rooms
   alias Chat.Rooms.Room
   alias Chat.UserRooms
@@ -21,27 +19,48 @@ defmodule ChatWeb.HomeLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex">
-      <div class="w-64 ">
-        <h1 class="text-center bg-red-200 text-3xl font-bold">Rooms</h1>
-        
-        <div class="flex min-h-screen flex-col gap-8">
-          <div id="rooms" phx-update="stream">
-            <div :for={{dom_id, room} <- @streams.rooms}>
-              <.link class="hover:bg-red-50 mr-2" navigate={~p"/chat/#{room.id}"} id={dom_id}>
-                {room.name}
-              </.link>
-            </div>
-          </div>
+    <div class="flex h-screen overflow-x-hidden">
+      <div class="flex flex-col bg-[#f2f3f5] text-lg text-[#69737F]">
+        <div class="flex border-b-2 border-gray-300 justify-between items-center p-1 px-2">
+          <h1 class="text-2xl font-semibold ">Rooms</h1>
           
-          <.form for={@room_form} phx-submit="save_room" phx-change="validate_room">
-            <.input field={@room_form[:name]} /> <button type="submit">Create Room</button>
-          </.form>
+          <div class="relative group">
+            <button
+              phx-click={show_modal("create-room-modal")}
+              class="text-4xl pb-1 text-[#8d8f92] hover:text-[#a9abafcb] group"
+            >
+              +
+              <div class="absolute left-1/2 transform
+                       -translate-x-1/2 z-20  w-max px-2 py-1
+                       text-sm text-white bg-gray-700 rounded
+                       shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none">
+                Add new room
+              </div>
+            </button>
+          </div>
+        </div>
+        
+        <div
+          id="rooms"
+          class="flex-1 flex flex-col w-64 overflow-y-auto overflow-x-hidden gap-1 p-2"
+          phx-update="stream"
+        >
+          <.link
+            :for={{dom_id, room} <- @streams.rooms}
+            class="flex items-center gap-2 hover:bg-[#e5e8ec]  w-full p-2 rounded hover:text-black"
+            navigate={~p"/chat/#{room.id}"}
+            id={dom_id}
+          >
+            <span class="font-semibold text-gray-500 text-2xl">#</span>
+            <p class="truncate">{room.name}</p>
+          </.link>
         </div>
       </div>
       
-      <div>
-        Select a room on the left to view its messages or create a new room.
+      <div class="flex flex-1 items-center justify-center">
+        <p class="text-center text-2xl">
+          Select a room on the left to view its messages or create a new room.
+        </p>
       </div>
     </div>
     """
