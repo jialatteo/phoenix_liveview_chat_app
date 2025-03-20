@@ -11,10 +11,12 @@ defmodule ChatWeb.ChatLive do
 
   def mount(params, _session, socket) do
     %{"room_id" => room_id} = params
+    current_user = socket.assigns.current_user
 
     if connected?(socket) do
+      Chat.UserRooms.subscribe({:user_id, current_user.id})
+      Chat.UserRooms.subscribe({:room_id, room_id})
       Chat.Messages.subscribe(room_id)
-      Chat.Rooms.subscribe()
     end
 
     message_changeset = Messages.change_message(%Message{})
@@ -23,7 +25,7 @@ defmodule ChatWeb.ChatLive do
 
     {:ok,
      socket
-     |> stream(:rooms, Rooms.list_rooms_of_user(socket.assigns.current_user.id))
+     |> stream(:rooms, Rooms.list_rooms_of_user(current_user.id))
      |> stream(:messages, Messages.get_messages_from_room(room_id))
      |> stream(:current_room_users, UserRooms.get_users_in_room(room_id))
      |> assign(:current_room, Rooms.get_room!(room_id))
@@ -48,8 +50,6 @@ defmodule ChatWeb.ChatLive do
   end
 
   def render(assigns) do
-    IO.inspect(assigns.streams.filtered_users, label: "fuck this bruh i fucking htae thi")
-
     ~H"""
     <div class="flex h-screen overflow-x-hidden">
       <div class="flex flex-col bg-[#f2f3f5] text-lg text-[#69737F]">
@@ -130,7 +130,7 @@ defmodule ChatWeb.ChatLive do
         <.modal id="room-info-modal">
           <p class="text-lg font-semibold border-b-2">Members:</p>
           
-          <div class="max-h-80 overflow-y-auto">
+          <div id="current_room_users" class="max-h-80 overflow-y-auto" phx-update="stream">
             <p :for={{dom_id, current_room_user} <- @streams.current_room_users} id={dom_id}>
               {current_room_user.email}
               <span :if={current_room_user.id == @current_user.id} class="font-bold">
@@ -317,15 +317,22 @@ defmodule ChatWeb.ChatLive do
     {:noreply, stream_insert(socket, :messages, message)}
   end
 
-  def handle_info({:room_created, room}, socket) do
-    if UserRooms.user_room_exist(%{
-         "user_id" => socket.assigns.current_user.id,
-         "room_id" => room.id
-       }) do
-      {:noreply, stream_insert(socket, :rooms, room)}
-    else
-      {:noreply, socket}
-    end
+  def handle_info({:room_added_user, user_id}, socket) do
+    IO.puts("FUCKING MESSAGE RECEIVED FOR PEOPLE SUBSCRIBED TO ROOM")
+    user = Users.get_user!(user_id)
+
+    {:noreply,
+     socket
+     |> stream_insert(:current_room_users, user, at: -1)}
+  end
+
+  def handle_info({:user_added_room, room_id}, socket) do
+    room = Rooms.get_room!(room_id)
+
+    {:noreply,
+     socket
+     |> stream_insert(:rooms, room)
+     |> put_flash(:info, "You have been added to room #{room.name}")}
   end
 
   def handle_event("validate_message", %{"message" => message_params}, socket) do
@@ -371,6 +378,7 @@ defmodule ChatWeb.ChatLive do
         {:noreply,
          socket
          |> assign(:room_form, to_form(Rooms.change_room(%Room{})))
+         |> stream_insert(:rooms, room)
          |> push_navigate(to: ~p"/chat/#{room.id}")
          |> put_flash(:info, "Room #{room.name} created")}
 
@@ -435,11 +443,6 @@ defmodule ChatWeb.ChatLive do
     current_room = socket.assigns.current_room
     selected_users = socket.assigns.invite_users_form.params["selected_users"]
     UserRooms.add_users_to_room(selected_users, current_room.id)
-
-    selected_users
-    |> Enum.each(fn user ->
-      socket = stream_insert(socket, :current_room_users, user)
-    end)
 
     {:noreply,
      socket

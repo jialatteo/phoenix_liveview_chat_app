@@ -45,10 +45,13 @@ defmodule Chat.UserRooms do
     end)
     |> Enum.each(fn user_room ->
       case Repo.insert(user_room) do
-        {:ok, _user_room} ->
-          :ok
+        {:ok, user_room} ->
+          broadcast({:ok, user_room}, :room_added_user)
+          broadcast({:ok, user_room}, :user_added_room)
 
-        {:error, changeset} ->
+        {:error, changeset} = error ->
+          broadcast(error, :room_added_user)
+          broadcast(error, :user_added_room)
           IO.inspect(changeset.errors, label: "Failed to insert UserRoom")
       end
     end)
@@ -133,5 +136,35 @@ defmodule Chat.UserRooms do
   """
   def change_user_room(%UserRoom{} = user_room, attrs \\ %{}) do
     UserRoom.changeset(user_room, attrs)
+  end
+
+  def subscribe({:user_id, user_id}) do
+    Phoenix.PubSub.subscribe(Chat.PubSub, "user-#{user_id}")
+  end
+
+  def subscribe({:room_id, room_id}) do
+    Phoenix.PubSub.subscribe(Chat.PubSub, "room-#{room_id}")
+  end
+
+  defp broadcast({:error, _changeset} = error, _event), do: error
+
+  defp broadcast({:ok, user_room}, :user_added_room) do
+    Phoenix.PubSub.broadcast(
+      Chat.PubSub,
+      "user-#{user_room.user_id}",
+      {:user_added_room, user_room.room_id}
+    )
+
+    {:ok, user_room.room_id}
+  end
+
+  defp broadcast({:ok, user_room}, :room_added_user) do
+    Phoenix.PubSub.broadcast(
+      Chat.PubSub,
+      "room-#{user_room.room_id}",
+      {:room_added_user, user_room.user_id}
+    )
+
+    {:ok, user_room.user_id}
   end
 end
