@@ -9,6 +9,9 @@ defmodule ChatWeb.ChatLive do
 
   on_mount {ChatWeb.UserAuth, :ensure_is_member}
 
+  @join_room_message "has joined the room."
+  @leave_room_message "has left the room."
+
   def mount(params, _session, socket) do
     %{"room_id" => room_id} = params
     current_user = socket.assigns.current_user
@@ -32,6 +35,8 @@ defmodule ChatWeb.ChatLive do
      |> assign(:message_form, to_form(message_changeset))
      |> assign(:room_form, to_form(room_changeset))
      |> assign(:invite_users_form, to_form(%{"selected_users" => [], "search" => ""}))
+     |> assign(:join_room_message, @join_room_message)
+     |> assign(:leave_room_message, @leave_room_message)
      |> stream(:filtered_users, [], reset: true)}
   end
 
@@ -266,7 +271,7 @@ defmodule ChatWeb.ChatLive do
             
             <div :if={message.is_action} class="gap-2 pl-3 flex mt-6">
               <svg
-                :if={message.content == "has left the room."}
+                :if={message.content == @leave_room_message}
                 class="w-8 h-8 fill-red-500"
                 version="1.1"
                 id="Layer_1"
@@ -280,7 +285,7 @@ defmodule ChatWeb.ChatLive do
               </svg>
               
               <svg
-                :if={message.content == "has joined the room."}
+                :if={message.content == @join_room_message}
                 class="w-8 h-8 fill-green-500"
                 version="1.1"
                 id="Layer_1"
@@ -393,6 +398,7 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_info({:room_added_user, user_id}, socket) do
+    IO.puts("RECEIVEDdddddddddddddddddddd")
     user = Users.get_user!(user_id)
 
     {:noreply,
@@ -401,6 +407,7 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_info({:user_added_room, room_id}, socket) do
+    IO.inspect("HI I AM HERE")
     room = Rooms.get_room!(room_id)
 
     {:noreply,
@@ -537,13 +544,27 @@ defmodule ChatWeb.ChatLive do
     current_user = socket.assigns.current_user
     UserRooms.remove_user_from_room(current_user.id, current_room.id)
 
-    {:noreply,
-     socket
-     |> put_flash(
-       :info,
-       "Left room #{current_room.name}!"
-     )
-     |> stream_delete(:rooms, current_room)
-     |> push_navigate(to: ~p"/")}
+    message_params = %{
+      "user_id" => current_user.id,
+      "room_id" => current_room.id,
+      "is_action" => true,
+      "content" => @leave_room_message
+    }
+
+    case Messages.create_message(message_params) do
+      {:ok, message} ->
+        {:noreply,
+         socket
+         |> stream_insert(:messages, message)
+         |> stream_delete(:rooms, current_room)
+         |> put_flash(
+           :info,
+           "Left room #{current_room.name}!"
+         )
+         |> push_navigate(to: ~p"/")}
+
+      {:error, changeset} ->
+        IO.inspect(changeset, label: "error")
+    end
   end
 end

@@ -86,24 +86,26 @@ defmodule Chat.Messages do
             latest_message_date != current_date
         end
 
-      is_start_of_seuqence =
-        if is_new_day || latest_message.is_action do
-          true
-        else
-          case latest_message do
-            nil ->
-              true
+      is_start_of_sequence =
+        cond do
+          attrs["is_action"] ->
+            false
 
-            message ->
-              Timex.diff(Timex.now(), message.inserted_at, :minutes) > 10 ||
-                message.user_id != attrs["user_id"]
-          end
+          is_new_day || latest_message.is_action ->
+            true
+
+          latest_message == nil ->
+            true
+
+          true ->
+            Timex.diff(Timex.now(), latest_message.inserted_at, :minutes) > 10 ||
+              latest_message.user_id != attrs["user_id"]
         end
 
       changeset =
         %Message{}
         |> Message.changeset(attrs)
-        |> Ecto.Changeset.put_change(:is_start_of_sequence, is_start_of_seuqence)
+        |> Ecto.Changeset.put_change(:is_start_of_sequence, is_start_of_sequence)
         |> Ecto.Changeset.put_change(:is_new_day, is_new_day)
 
       case repo.insert(changeset) do
