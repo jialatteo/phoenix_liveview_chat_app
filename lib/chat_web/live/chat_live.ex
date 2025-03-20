@@ -122,21 +122,30 @@ defmodule ChatWeb.ChatLive do
               phx-click={show_modal("add-members-modal")}
               class="flex-shrink-0 ml-auto bg-gray-700 text-white hover:bg-gray-800 text-sm rounded p-1 px-2 mr-2"
             >
-              + Add members
+              + Add
             </button>
           </div>
         </div>
         
         <.modal id="room-info-modal">
-          <p class="text-lg font-semibold border-b-2">Members:</p>
+          <p class="text-lg font-semibold">Members:</p>
           
-          <div id="current_room_users" class="max-h-80 overflow-y-auto" phx-update="stream">
+          <div id="current_room_users" class="border max-h-80 overflow-y-auto" phx-update="stream">
             <p :for={{dom_id, current_room_user} <- @streams.current_room_users} id={dom_id}>
               {current_room_user.email}
               <span :if={current_room_user.id == @current_user.id} class="font-bold">
                 (you)
               </span>
             </p>
+          </div>
+          
+          <div class="flex justify-end">
+            <button
+              phx-click="leave_room"
+              class="bg-red-600 mt-8 text-white hover:bg-red-700 text-sm rounded p-1 px-2"
+            >
+              Leave room
+            </button>
           </div>
         </.modal>
         
@@ -176,7 +185,7 @@ defmodule ChatWeb.ChatLive do
           </div>
           
           <.form
-            phx-submit="add-members"
+            phx-submit="add_members"
             class="relative"
             for={@invite_users_form}
             phx-change="filter_users"
@@ -318,7 +327,6 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_info({:room_added_user, user_id}, socket) do
-    IO.puts("FUCKING MESSAGE RECEIVED FOR PEOPLE SUBSCRIBED TO ROOM")
     user = Users.get_user!(user_id)
 
     {:noreply,
@@ -333,6 +341,11 @@ defmodule ChatWeb.ChatLive do
      socket
      |> stream_insert(:rooms, room)
      |> put_flash(:info, "You have been added to room #{room.name}")}
+  end
+
+  def handle_info({:room_removed_user, user_id}, socket) do
+    user = Users.get_user!(user_id)
+    {:noreply, stream_delete(socket, :current_room_users, user)}
   end
 
   def handle_event("validate_message", %{"message" => message_params}, socket) do
@@ -439,7 +452,7 @@ defmodule ChatWeb.ChatLive do
      )}
   end
 
-  def handle_event("add-members", _, socket) do
+  def handle_event("add_members", _, socket) do
     current_room = socket.assigns.current_room
     selected_users = socket.assigns.invite_users_form.params["selected_users"]
     UserRooms.add_users_to_room(selected_users, current_room.id)
@@ -451,5 +464,20 @@ defmodule ChatWeb.ChatLive do
        "Added to room #{current_room.name}!"
      )
      |> push_navigate(to: ~p"/chat/#{current_room.id}")}
+  end
+
+  def handle_event("leave_room", _, socket) do
+    current_room = socket.assigns.current_room
+    current_user = socket.assigns.current_user
+    UserRooms.remove_user_from_room(current_user.id, current_room.id)
+
+    {:noreply,
+     socket
+     |> put_flash(
+       :info,
+       "Left room #{current_room.name}!"
+     )
+     |> stream_delete(:rooms, current_room)
+     |> push_navigate(to: ~p"/")}
   end
 end

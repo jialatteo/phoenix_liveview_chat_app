@@ -35,6 +35,19 @@ defmodule Chat.UserRooms do
     |> Enum.map(& &1.user)
   end
 
+  def remove_user_from_room(user_id, room_id) do
+    user_room = Repo.get_by(UserRoom, user_id: user_id, room_id: room_id)
+
+    case user_room do
+      nil ->
+        {:error, :not_found}
+
+      _ ->
+        Repo.delete(user_room)
+        broadcast({:ok, user_room}, :room_removed_user)
+    end
+  end
+
   def add_users_to_room(users, room_id) do
     users
     |> Enum.map(fn user ->
@@ -163,6 +176,16 @@ defmodule Chat.UserRooms do
       Chat.PubSub,
       "room-#{user_room.room_id}",
       {:room_added_user, user_room.user_id}
+    )
+
+    {:ok, user_room.user_id}
+  end
+
+  defp broadcast({:ok, user_room}, :room_removed_user) do
+    Phoenix.PubSub.broadcast(
+      Chat.PubSub,
+      "room-#{user_room.room_id}",
+      {:room_removed_user, user_room.user_id}
     )
 
     {:ok, user_room.user_id}
