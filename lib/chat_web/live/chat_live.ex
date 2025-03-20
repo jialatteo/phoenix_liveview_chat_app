@@ -392,11 +392,12 @@ defmodule ChatWeb.ChatLive do
     {:noreply, stream_insert(socket, :messages, message)}
   end
 
-  def handle_info({:room_added_user, user_id}, socket) do
+  def handle_info({:room_added_user, user_id, message}, socket) do
     user = Users.get_user!(user_id)
 
     {:noreply,
      socket
+     |> stream_insert(:messages, message)
      |> stream_insert(:current_room_users, user, at: -1)}
   end
 

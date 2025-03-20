@@ -85,8 +85,25 @@ defmodule Chat.UserRooms do
     |> Enum.each(fn user_room ->
       case Repo.insert(user_room) do
         {:ok, user_room} ->
-          broadcast({:ok, user_room}, :room_added_user)
-          broadcast({:ok, user_room}, :user_added_room)
+          message_params = %{
+            "user_id" => user_room.user_id,
+            "room_id" => room_id,
+            "is_action" => true,
+            "content" => "has joined the room."
+          }
+
+          case Messages.create_message(message_params) do
+            {:ok, message} ->
+              broadcast(
+                {:ok, %{"user_room" => user_room, "message" => message}, :room_added_user}
+              )
+
+              broadcast({:ok, user_room}, :user_added_room)
+
+            {:error, changeset} ->
+              IO.inspect(changeset.errors, label: "Failed to create message")
+              Repo.rollback(:message_creation_failed)
+          end
 
         {:error, changeset} = error ->
           broadcast(error, :room_added_user)
@@ -197,16 +214,14 @@ defmodule Chat.UserRooms do
     {:ok, user_room.room_id}
   end
 
-  defp broadcast({:ok, user_room}, :room_added_user) do
-    IO.inspect("broadcasting to topic room-#{user_room.room_id}")
-
+  defp broadcast({:ok, %{"message" => message, "user_room" => user_room}, :room_added_user}) do
     Phoenix.PubSub.broadcast(
       Chat.PubSub,
       "room-#{user_room.room_id}",
-      {:room_added_user, user_room.user_id}
+      {:room_added_user, user_room.user_id, message}
     )
 
-    {:ok, user_room.user_id}
+    {:ok, user_room.user_id, message}
   end
 
   defp broadcast({:ok, %{"message" => message, "user_room" => user_room}, :room_removed_user}) do
