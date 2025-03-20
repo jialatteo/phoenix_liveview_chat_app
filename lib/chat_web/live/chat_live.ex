@@ -113,7 +113,6 @@ defmodule ChatWeb.ChatLive do
               <svg
                 class="w-5 h-5 hover:fill-gray-500"
                 version="1.1"
-                id="Capa_1"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 416.979 416.979"
@@ -178,7 +177,6 @@ defmodule ChatWeb.ChatLive do
                 <svg
                   class="h-[10px] w-[10px] fill-gray-400 group-hover:fill-black"
                   version="1.1"
-                  id="Capa_1"
                   xmlns="http://www.w3.org/2000/svg"
                   xmlns:xlink="http://www.w3.org/1999/xlink"
                   viewBox="0 0 460.775 460.775"
@@ -274,7 +272,6 @@ defmodule ChatWeb.ChatLive do
                 :if={message.content == @leave_room_message}
                 class="w-8 h-8 fill-red-500"
                 version="1.1"
-                id="Layer_1"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 476.213 476.213"
@@ -288,18 +285,17 @@ defmodule ChatWeb.ChatLive do
                 :if={message.content == @join_room_message}
                 class="w-8 h-8 fill-green-500"
                 version="1.1"
-                id="Layer_1"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 476.213 476.213"
                 xml:space="preserve"
                 transform="matrix(-1, 0, 0, 1, 0, 0)"
               >
-                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g stroke-width="0"></g>
                 
-                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g stroke-linecap="round" stroke-linejoin="round"></g>
                 
-                <g id="SVGRepo_iconCarrier">
+                <g>
                   <polygon points="476.213,223.107 57.427,223.107 151.82,128.713 130.607,107.5 0,238.106 130.607,368.714 151.82,347.5 57.427,253.107 476.213,253.107 ">
                   </polygon>
                 </g>
@@ -307,7 +303,7 @@ defmodule ChatWeb.ChatLive do
               
               <div class="relative">
                 <p class="break-words pl-3 pt-[2px]">
-                  <span class="font-bold">{message.user.email}</span> {message.content}
+                  <span class="font-bold">{message.user.email}</span> <span>{message.content}</span>
                   <span class="text-xs font-normal select-none text-gray-500">
                     {format_inserted_at_full(message.inserted_at)}
                   </span>
@@ -362,12 +358,9 @@ defmodule ChatWeb.ChatLive do
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
             >
-              <g id="🔍-Product-Icons" stroke-width="1" fill-rule="evenodd">
-                <g id="ic_fluent_send_28_filled" fill-rule="nonzero">
-                  <path
-                    d="M3.78963301,2.77233335 L24.8609339,12.8499121 C25.4837277,13.1477699 25.7471402,13.8941055 25.4492823,14.5168992 C25.326107,14.7744476 25.1184823,14.9820723 24.8609339,15.1052476 L3.78963301,25.1828263 C3.16683929,25.4806842 2.42050372,25.2172716 2.12264586,24.5944779 C1.99321184,24.3238431 1.96542524,24.015685 2.04435886,23.7262618 L4.15190935,15.9983421 C4.204709,15.8047375 4.36814355,15.6614577 4.56699265,15.634447 L14.7775879,14.2474874 C14.8655834,14.2349166 14.938494,14.177091 14.9721837,14.0981464 L14.9897199,14.0353553 C15.0064567,13.9181981 14.9390703,13.8084248 14.8334007,13.7671556 L14.7775879,13.7525126 L4.57894108,12.3655968 C4.38011873,12.3385589 4.21671819,12.1952832 4.16392965,12.0016992 L2.04435886,4.22889788 C1.8627142,3.56286745 2.25538645,2.87569101 2.92141688,2.69404635 C3.21084015,2.61511273 3.51899823,2.64289932 3.78963301,2.77233335 Z"
-                    id="🎨-Color"
-                  >
+              <g stroke-width="1" fill-rule="evenodd">
+                <g fill-rule="nonzero">
+                  <path d="M3.78963301,2.77233335 L24.8609339,12.8499121 C25.4837277,13.1477699 25.7471402,13.8941055 25.4492823,14.5168992 C25.326107,14.7744476 25.1184823,14.9820723 24.8609339,15.1052476 L3.78963301,25.1828263 C3.16683929,25.4806842 2.42050372,25.2172716 2.12264586,24.5944779 C1.99321184,24.3238431 1.96542524,24.015685 2.04435886,23.7262618 L4.15190935,15.9983421 C4.204709,15.8047375 4.36814355,15.6614577 4.56699265,15.634447 L14.7775879,14.2474874 C14.8655834,14.2349166 14.938494,14.177091 14.9721837,14.0981464 L14.9897199,14.0353553 C15.0064567,13.9181981 14.9390703,13.8084248 14.8334007,13.7671556 L14.7775879,13.7525126 L4.57894108,12.3655968 C4.38011873,12.3385589 4.21671819,12.1952832 4.16392965,12.0016992 L2.04435886,4.22889788 C1.8627142,3.56286745 2.25538645,2.87569101 2.92141688,2.69404635 C3.21084015,2.61511273 3.51899823,2.64289932 3.78963301,2.77233335 Z">
                   </path>
                 </g>
               </g>
@@ -417,8 +410,26 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_info({:room_removed_user, user_id}, socket) do
+    current_room = socket.assigns.current_room
     user = Users.get_user!(user_id)
-    {:noreply, stream_delete(socket, :current_room_users, user)}
+
+    message_params = %{
+      "user_id" => user_id,
+      "room_id" => current_room.id,
+      "is_action" => true,
+      "content" => @leave_room_message
+    }
+
+    case Messages.create_message(message_params) do
+      {:ok, message} ->
+        {:noreply,
+         socket
+         |> stream_delete(:current_room_users, user)
+         |> stream_insert(:messages, message)}
+
+      {:error, changeset} ->
+        IO.inspect(changeset, label: "error")
+    end
   end
 
   def handle_event("validate_message", %{"message" => message_params}, socket) do
@@ -544,27 +555,13 @@ defmodule ChatWeb.ChatLive do
     current_user = socket.assigns.current_user
     UserRooms.remove_user_from_room(current_user.id, current_room.id)
 
-    message_params = %{
-      "user_id" => current_user.id,
-      "room_id" => current_room.id,
-      "is_action" => true,
-      "content" => @leave_room_message
-    }
-
-    case Messages.create_message(message_params) do
-      {:ok, message} ->
-        {:noreply,
-         socket
-         |> stream_insert(:messages, message)
-         |> stream_delete(:rooms, current_room)
-         |> put_flash(
-           :info,
-           "Left room #{current_room.name}!"
-         )
-         |> push_navigate(to: ~p"/")}
-
-      {:error, changeset} ->
-        IO.inspect(changeset, label: "error")
-    end
+    {:noreply,
+     socket
+     |> put_flash(
+       :info,
+       "Left room #{current_room.name}!"
+     )
+     |> stream_delete(:rooms, current_room)
+     |> push_navigate(to: ~p"/")}
   end
 end
