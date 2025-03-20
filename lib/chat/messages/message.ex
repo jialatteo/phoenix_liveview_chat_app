@@ -5,6 +5,8 @@ defmodule Chat.Messages.Message do
   schema "messages" do
     field :content, :string
     field :is_start_of_sequence, :boolean, default: false
+    field :is_action, :boolean, default: false
+    field :is_new_day, :boolean, default: false
     belongs_to :user, Chat.Users.User
     belongs_to :room, Chat.Rooms.Room
 
@@ -14,7 +16,7 @@ defmodule Chat.Messages.Message do
   @doc false
   def changeset(message, attrs) do
     message
-    |> cast(attrs, [:content, :is_start_of_sequence, :user_id, :room_id])
+    |> cast(attrs, [:content, :is_start_of_sequence, :is_action, :is_new_day, :user_id, :room_id])
     |> validate_required([:content, :user_id, :room_id])
     |> assoc_constraint(:user)
     |> assoc_constraint(:room)

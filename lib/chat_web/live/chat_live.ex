@@ -49,6 +49,12 @@ defmodule ChatWeb.ChatLive do
     |> String.downcase()
   end
 
+  def format_inserted_at_date_only(inserted_at) do
+    inserted_at
+    |> Timex.Timezone.convert("Asia/Singapore")
+    |> Timex.format!("%d %B %Y", :strftime)
+  end
+
   def render(assigns) do
     ~H"""
     <div class="flex h-screen overflow-x-hidden">
@@ -244,9 +250,22 @@ defmodule ChatWeb.ChatLive do
           class="-mt-5 pb-4 flex-1 overflow-y-auto"
           phx-update="stream"
         >
-          <div :for={{dom_id, message} <- @streams.messages} class="pl-16 group" id={dom_id}>
-            <div :if={message.is_start_of_sequence} class="mt-6 relative">
-              <div class="w-11 absolute -left-14 top-1 h-11 -z-10 rounded-full bg-red-400"></div>
+          <div :for={{dom_id, message} <- @streams.messages} class="group" id={dom_id}>
+            <div
+              :if={message.is_new_day}
+              class="text-xs font-bold mt-8 -mb-2 text-gray-500 text-center"
+            >
+              <div class="flex items-center justify-center space-x-2">
+                <span class="flex-1 border-t border-gray-300"></span>
+                <span class="text-center font-semibold">
+                  {format_inserted_at_date_only(message.inserted_at)}
+                </span>
+                 <span class="flex-1 border-t border-gray-300"></span>
+              </div>
+            </div>
+            
+            <div :if={message.is_start_of_sequence} class="mt-6 pl-16 relative">
+              <div class="w-11 absolute left-2 top-1 h-11 -z-10 rounded-full bg-red-400"></div>
               
               <p class="font-bold">
                 {message.user.email}
@@ -257,13 +276,13 @@ defmodule ChatWeb.ChatLive do
             </div>
             
             <div class="relative">
-              <p class="break-words">
+              <p class="break-words pl-16">
                 {message.content}
               </p>
               
               <p
                 :if={!message.is_start_of_sequence}
-                class="invisible group group-hover:visible absolute top-1 right-full -translate-x-3 text-xs font-normal whitespace-nowrap text-gray-500 pointer-events-none select-none"
+                class="invisible group group-hover:visible absolute top-1 right-full translate-x-[52px] text-xs font-normal whitespace-nowrap text-gray-500 pointer-events-none select-none"
               >
                 {format_inserted_at_time_only(message.inserted_at)}
               </p>
@@ -282,6 +301,7 @@ defmodule ChatWeb.ChatLive do
             placeholder="Write a message..."
             input_class="mt-0 bg-gray-50"
             field={@message_form[:content]}
+            autocomplete="off"
           />
           <button type="submit" class="self-start pt-1">
             <svg

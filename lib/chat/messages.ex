@@ -73,20 +73,38 @@ defmodule Chat.Messages do
       end
     end)
     |> Ecto.Multi.run(:create_message, fn repo, %{get_latest_message_in_room: latest_message} ->
-      is_start_of_seuqence =
+      is_new_day =
         case latest_message do
           nil ->
             true
 
           message ->
-            Timex.diff(Timex.now(), message.inserted_at, :minutes) > 10 ||
-              message.user_id != attrs["user_id"]
+            latest_message_date =
+              Timex.to_datetime(message.inserted_at, "Asia/Singapore") |> Timex.to_date()
+
+            current_date = Timex.now("Asia/Singapore") |> Timex.to_date()
+            latest_message_date != current_date
+        end
+
+      is_start_of_seuqence =
+        if is_new_day do
+          true
+        else
+          case latest_message do
+            nil ->
+              true
+
+            message ->
+              Timex.diff(Timex.now(), message.inserted_at, :minutes) > 10 ||
+                message.user_id != attrs["user_id"]
+          end
         end
 
       changeset =
         %Message{}
         |> Message.changeset(attrs)
         |> Ecto.Changeset.put_change(:is_start_of_sequence, is_start_of_seuqence)
+        |> Ecto.Changeset.put_change(:is_new_day, is_new_day)
 
       case repo.insert(changeset) do
         {:ok, message} -> {:ok, message}
