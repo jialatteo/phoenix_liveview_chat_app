@@ -87,7 +87,7 @@ defmodule Chat.Messages do
         end
 
       is_start_of_seuqence =
-        if is_new_day do
+        if is_new_day || latest_message.is_action do
           true
         else
           case latest_message do

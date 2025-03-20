@@ -264,6 +264,52 @@ defmodule ChatWeb.ChatLive do
               </div>
             </div>
             
+            <div :if={message.is_action} class="gap-2 pl-3 flex mt-6">
+              <svg
+                :if={message.content == "has left the room."}
+                class="w-8 h-8 fill-red-500"
+                version="1.1"
+                id="Layer_1"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 476.213 476.213"
+                xml:space="preserve"
+              >
+                <polygon points="476.213,223.107 57.427,223.107 151.82,128.713 130.607,107.5 0,238.106 130.607,368.714 151.82,347.5
+    57.427,253.107 476.213,253.107 " />
+              </svg>
+              
+              <svg
+                :if={message.content == "has joined the room."}
+                class="w-8 h-8 fill-green-500"
+                version="1.1"
+                id="Layer_1"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 476.213 476.213"
+                xml:space="preserve"
+                transform="matrix(-1, 0, 0, 1, 0, 0)"
+              >
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                
+                <g id="SVGRepo_iconCarrier">
+                  <polygon points="476.213,223.107 57.427,223.107 151.82,128.713 130.607,107.5 0,238.106 130.607,368.714 151.82,347.5 57.427,253.107 476.213,253.107 ">
+                  </polygon>
+                </g>
+              </svg>
+              
+              <div class="relative">
+                <p class="break-words pl-3 pt-[2px]">
+                  <span class="font-bold">{message.user.email}</span> {message.content}
+                  <span class="text-xs font-normal select-none text-gray-500">
+                    {format_inserted_at_full(message.inserted_at)}
+                  </span>
+                </p>
+              </div>
+            </div>
+            
             <div :if={message.is_start_of_sequence} class="mt-6 pl-16 relative">
               <div class="w-11 absolute left-2 top-1 h-11 -z-10 rounded-full bg-red-400"></div>
               
@@ -275,7 +321,7 @@ defmodule ChatWeb.ChatLive do
               </p>
             </div>
             
-            <div class="relative">
+            <div :if={!message.is_action} class="relative">
               <p class="break-words pl-16">
                 {message.content}
               </p>
