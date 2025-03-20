@@ -397,12 +397,11 @@ defmodule ChatWeb.ChatLive do
 
     {:noreply,
      socket
-     |> stream_insert(:messages, message)
+     |> stream_insert(:messages, message, at: -1)
      |> stream_insert(:current_room_users, user, at: -1)}
   end
 
   def handle_info({:user_added_room, room_id}, socket) do
-    IO.inspect("HI I AM HERE")
     room = Rooms.get_room!(room_id)
 
     {:noreply,
@@ -416,7 +415,7 @@ defmodule ChatWeb.ChatLive do
 
     {:noreply,
      socket
-     |> stream_insert(:messages, message)
+     |> stream_insert(:messages, message, at: -1)
      |> stream_delete(:current_room_users, user)}
   end
 
@@ -459,11 +458,12 @@ defmodule ChatWeb.ChatLive do
     room_params = Map.put(room_params, "user_id", socket.assigns.current_user.id)
 
     case Rooms.create_room(room_params) do
-      {:ok, room} ->
+      {:ok, room, message} ->
         {:noreply,
          socket
          |> assign(:room_form, to_form(Rooms.change_room(%Room{})))
          |> stream_insert(:rooms, room)
+         |> stream_insert(:messages, message)
          |> push_navigate(to: ~p"/chat/#{room.id}")
          |> put_flash(:info, "Room #{room.name} created")}
 

@@ -5,6 +5,8 @@ defmodule Chat.Rooms do
 
   import Ecto.Query, warn: false
   alias Chat.Repo
+  alias Chat.Messages
+  alias Chat.Messages.Message
 
   alias Chat.Rooms.Room
   alias Chat.UserRooms.UserRoom
@@ -69,10 +71,20 @@ defmodule Chat.Rooms do
           "is_admin" => true
         })
       end)
+      |> Ecto.Multi.insert(:insert_join_message, fn %{insert_user_room: user_room} ->
+        message_params = %{
+          "user_id" => user_room.user_id,
+          "room_id" => user_room.room_id,
+          "is_action" => true,
+          "content" => "has joined the room."
+        }
+
+        Message.changeset(%Message{}, message_params)
+      end)
 
     case Repo.transaction(multi) do
-      {:ok, %{insert_room: room}} ->
-        broadcast({:ok, room}, :room_created)
+      {:ok, %{insert_room: room, insert_join_message: message}} ->
+        broadcast({:ok, room, message}, :room_created)
 
       {:error, _failed_operation_name, changeset, _changes_so_far} ->
         broadcast({:error, changeset}, :room_created)
@@ -132,8 +144,8 @@ defmodule Chat.Rooms do
 
   defp broadcast({:error, _changeset} = error, _event), do: error
 
-  defp broadcast({:ok, room}, event) do
-    Phoenix.PubSub.broadcast(Chat.PubSub, "rooms", {event, room})
-    {:ok, room}
+  defp broadcast({:ok, room, message}, event) do
+    Phoenix.PubSub.broadcast(Chat.PubSub, "rooms", {event, room, message})
+    {:ok, room, message}
   end
 end
