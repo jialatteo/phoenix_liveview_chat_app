@@ -312,7 +312,9 @@ defmodule ChatWeb.ChatLive do
             </div>
             
             <div :if={message.is_start_of_sequence} class="mt-6 pl-16 relative">
-              <div class="w-11 absolute left-2 top-1 h-11 -z-10 rounded-full bg-red-400"></div>
+              <div class="w-11 absolute left-2 top-1 h-11 -z-10 rounded-full border flex items-center justify-center ">
+                <img src={message.user.profile_image} class="h-10 w-10" alt="pokemon" />
+              </div>
               
               <p class="font-bold">
                 {message.user.email}

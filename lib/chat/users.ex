@@ -95,6 +95,47 @@ defmodule Chat.Users do
 
   """
   def register_user(attrs) do
+    pokemon_images = [
+      "/pokemons/001.png",
+      "/pokemons/004.png",
+      "/pokemons/007.png",
+      "/pokemons/010.png",
+      "/pokemons/011.png",
+      "/pokemons/014.png",
+      "/pokemons/020.png",
+      "/pokemons/023.png",
+      "/pokemons/025.png",
+      "/pokemons/035.png",
+      "/pokemons/039.png",
+      "/pokemons/043.png",
+      "/pokemons/050.png",
+      "/pokemons/054.png",
+      "/pokemons/061.png",
+      "/pokemons/063.png",
+      "/pokemons/070.png",
+      "/pokemons/079.png",
+      "/pokemons/081.png",
+      "/pokemons/088.png",
+      "/pokemons/090.png",
+      "/pokemons/092.png",
+      "/pokemons/094.png",
+      "/pokemons/096.png",
+      "/pokemons/100.png",
+      "/pokemons/104.png",
+      "/pokemons/108.png",
+      "/pokemons/113.png",
+      "/pokemons/119.png",
+      "/pokemons/120.png",
+      "/pokemons/129.png",
+      "/pokemons/132.png",
+      "/pokemons/133.png",
+      "/pokemons/143.png",
+      "/pokemons/175.png"
+    ]
+
+    attrs =
+      Map.put(attrs, :profile_image, Enum.random(pokemon_images))
+
     result =
       Ecto.Multi.new()
       |> Ecto.Multi.insert(:user, User.registration_changeset(%User{}, attrs))
