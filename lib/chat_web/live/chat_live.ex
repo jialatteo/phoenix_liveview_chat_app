@@ -63,7 +63,11 @@ defmodule ChatWeb.ChatLive do
   def render(assigns) do
     ~H"""
     <div class="flex h-screen overflow-x-hidden">
-      <div class="flex flex-col w-64 bg-[#f2f3f5] text-lg text-[#69737F]">
+      <div
+        phx-hook="SidebarResize"
+        id="sidebar"
+        class="flex flex-col sm:w-64 bg-[#f2f3f5] text-lg text-[#69737F]"
+      >
         <div class="flex border-b-2 border-gray-300 justify-between items-center p-1 px-2">
           <h1 class="text-2xl font-semibold">Rooms</h1>
           
@@ -135,7 +139,16 @@ defmodule ChatWeb.ChatLive do
       <div class="w-full flex flex-col overflow-x-hidden">
         <div class="flex z-10 bg-white w-full items-center justify-between pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
           <div class="flex w-full items-center gap-2">
-            <span class="text-3xl text-gray-500 font-semibold">#</span>
+            <button
+              class="font-bold sm:hidden text-xl text-gray-400 hover:text-gray-600 pr-2"
+              phx-click={
+                JS.toggle_class("hidden", to: "#sidebar")
+                |> JS.add_class("clicked-burger", to: "#sidebar")
+              }
+            >
+              ☰
+            </button>
+             <span class="text-3xl text-gray-500 font-semibold">#</span>
             <span class="text-2xl font-semibold pb-1 truncate flex-grow">{@current_room.name}</span>
             <button phx-click={show_modal("room-info-modal")}>
               <svg
