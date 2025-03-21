@@ -115,7 +115,7 @@ defmodule ChatWeb.ChatLive do
             </p>
           </div>
           
-          <button class="bg-gray-700 text-white w-full my-2 hover:bg-gray-800 text-sm rounded p-2 px-2 mr-2">
+          <button class="bg-gray-700 text-white w-full mt-4 mb-2 hover:bg-gray-800 text-sm rounded p-2 px-2 mr-2">
             Settings
           </button>
           
@@ -291,7 +291,7 @@ defmodule ChatWeb.ChatLive do
             <div :if={message.is_action} class="gap-2 pl-3 flex mt-6">
               <svg
                 :if={message.content == @leave_room_message}
-                class="w-8 h-8 fill-red-500"
+                class="w-8 h-8 flex-shrink-0 fill-red-500"
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -304,7 +304,7 @@ defmodule ChatWeb.ChatLive do
               
               <svg
                 :if={message.content == @join_room_message}
-                class="w-8 h-8 fill-green-500"
+                class="w-8 h-8 flex-shrink-0 fill-green-500"
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
