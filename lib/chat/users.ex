@@ -5,6 +5,7 @@ defmodule Chat.Users do
 
   import Ecto.Query, warn: false
   alias Chat.Repo
+  alias Chat.Messages.Message
 
   alias Chat.Users.{User, UserToken, UserNotifier}
   alias Chat.UserRooms.UserRoom
@@ -94,14 +95,32 @@ defmodule Chat.Users do
 
   """
   def register_user(attrs) do
-    Ecto.Multi.new()
-    |> Ecto.Multi.insert(:user, User.registration_changeset(%User{}, attrs))
-    |> Ecto.Multi.insert(:user_room, fn %{user: user} ->
-      UserRoom.changeset(%UserRoom{}, %{"user_id" => user.id, "room_id" => 1})
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} ->
+    result =
+      Ecto.Multi.new()
+      |> Ecto.Multi.insert(:user, User.registration_changeset(%User{}, attrs))
+      |> Ecto.Multi.insert(:insert_user_room, fn %{user: user} ->
+        UserRoom.changeset(%UserRoom{}, %{"user_id" => user.id, "room_id" => 1})
+      end)
+      |> Ecto.Multi.insert(:insert_join_message, fn %{insert_user_room: user_room} ->
+        message_params = %{
+          "user_id" => user_room.user_id,
+          "room_id" => user_room.room_id,
+          "is_action" => true,
+          "content" => "has joined the room."
+        }
+
+        Message.changeset(%Message{}, message_params)
+      end)
+      |> Repo.transaction()
+
+    case result do
+      {:ok, %{user: user, insert_user_room: user_room, insert_join_message: message}} ->
+        Phoenix.PubSub.broadcast(
+          Chat.PubSub,
+          "room-#{user_room.room_id}",
+          {:room_added_user, user_room.user_id, message |> Repo.preload(:user)}
+        )
+
         {:ok, user}
 
       {:error, _step, changeset, _changes} ->

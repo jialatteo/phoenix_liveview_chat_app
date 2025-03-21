@@ -392,6 +392,7 @@ defmodule ChatWeb.ChatLive do
 
   def handle_info({:room_added_user, user_id, message}, socket) do
     user = Users.get_user!(user_id)
+    IO.inspect(user, label: "received user")
 
     {:noreply,
      socket

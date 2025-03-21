@@ -58,7 +58,7 @@ defmodule ChatWeb.HomeLive do
       </div>
       
       <div class="flex flex-1 items-center justify-center">
-        <p class="text-center text-2xl">
+        <p class="text-center px-4 text-2xl">
           Select a room on the left to view its messages or create a new room.
         </p>
       </div>
@@ -89,7 +89,7 @@ defmodule ChatWeb.HomeLive do
     room_params = Map.put(room_params, "user_id", socket.assigns.current_user.id)
 
     case Rooms.create_room(room_params) do
-      {:ok, room} ->
+      {:ok, room, _message} ->
         {:noreply,
          socket
          |> assign(:room_form, to_form(Rooms.change_room(%Room{})))
