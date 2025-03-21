@@ -12,27 +12,27 @@
     </script>
   </head>
   <body class="bg-white">
-    <ul class="relative z-10 border-b-2 py-3 flex items-center gap-5 px-4 sm:px-6 lg:px-8 justify-end">
+    <ul class="relative z-10 border-b-2 py-[14px] flex items-center gap-5 px-4 sm:px-6 lg:px-8 justify-end">
       <%= if @current_user do %>
-        <li class="text-xl leading-6 text-zinc-900">
+        <%!-- <li class="text-xl leading-6 text-zinc-900">
           {@current_user.email}
-        </li>
+        </li> --%>
         <li>
           <.link
             href={~p"/chat/1"}
-            class="text-xl leading-6 text-zinc-900 font-semibold hover:text-zinc-700 hover:underline"
+            class="rounded bg-gray-700 text-white leading-6 py-[6px] px-3 hover:bg-gray-800 font-semibold"
           >
-            Chat
+            Back to Chat
           </.link>
         </li>
-        <li>
+        <%!-- <li>
           <.link
             href={~p"/users/settings"}
             class="text-xl leading-6 text-zinc-900 font-semibold hover:text-zinc-700 hover:underline"
           >
             Settings
           </.link>
-        </li>
+        </li> --%>
         <%!-- <li>
           <.link
             href={~p"/users/log_out"}
