@@ -20,7 +20,7 @@ defmodule ChatWeb.HomeLive do
   def render(assigns) do
     ~H"""
     <div class="flex h-screen overflow-x-hidden">
-      <div class="flex flex-col bg-[#f2f3f5] text-lg text-[#69737F]">
+      <div class="flex flex-col w-64 bg-[#f2f3f5] text-lg text-[#69737F]">
         <div class="flex border-b-2 border-gray-300 justify-between items-center p-1 px-2">
           <h1 class="text-2xl font-semibold ">Rooms</h1>
           
@@ -53,6 +53,34 @@ defmodule ChatWeb.HomeLive do
           >
             <span class="font-semibold text-gray-500 text-2xl">#</span>
             <p class="truncate">{room.name}</p>
+          </.link>
+        </div>
+        
+        <div class="border-t-2 p-2 border-gray-400">
+          <div class="flex items-center gap-2">
+            <img
+              src={@current_user.profile_image}
+              class="h-10 w-10 border border-gray-400 rounded-full"
+              alt="pokemon"
+            />
+            <p class="font-medium text-base text-black break-all">
+              {@current_user.email}
+            </p>
+          </div>
+          
+          <.link
+            href={~p"/users/settings"}
+            class="bg-gray-700 block text-white w-full text-center hover:bg-gray-800 text-sm rounded mb-2 mt-4 p-2 px-2 mr-2"
+          >
+            Settings
+          </.link>
+          
+          <.link
+            href={~p"/users/log_out"}
+            method="delete"
+            class="bg-gray-700 block text-white w-full text-center hover:bg-gray-800 text-sm rounded p-2 px-2 mr-2"
+          >
+            Log out
           </.link>
         </div>
       </div>

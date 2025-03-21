@@ -65,7 +65,7 @@ defmodule ChatWeb.ChatLive do
     <div class="flex h-screen overflow-x-hidden">
       <div class="flex flex-col w-64 bg-[#f2f3f5] text-lg text-[#69737F]">
         <div class="flex border-b-2 border-gray-300 justify-between items-center p-1 px-2">
-          <h1 class="text-2xl font-semibold ">Rooms</h1>
+          <h1 class="text-2xl font-semibold">Rooms</h1>
           
           <div class="relative group">
             <button
