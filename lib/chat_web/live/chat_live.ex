@@ -115,13 +115,20 @@ defmodule ChatWeb.ChatLive do
             </p>
           </div>
           
-          <button class="bg-gray-700 text-white w-full mt-4 mb-2 hover:bg-gray-800 text-sm rounded p-2 px-2 mr-2">
+          <.link
+            href={~p"/users/settings"}
+            class="bg-gray-700 block text-white w-full text-center hover:bg-gray-800 text-sm rounded mb-2 mt-4 p-2 px-2 mr-2"
+          >
             Settings
-          </button>
+          </.link>
           
-          <button class="bg-gray-700 text-white w-full hover:bg-gray-800 text-sm rounded p-2 px-2 mr-2">
+          <.link
+            href={~p"/users/log_out"}
+            method="delete"
+            class="bg-gray-700 block text-white w-full text-center hover:bg-gray-800 text-sm rounded p-2 px-2 mr-2"
+          >
             Log out
-          </button>
+          </.link>
         </div>
       </div>
       
