@@ -134,7 +134,7 @@ defmodule Chat.Users do
     ]
 
     attrs =
-      Map.put(attrs, :profile_image, Enum.random(pokemon_images))
+      Map.put(attrs, "profile_image", Enum.random(pokemon_images))
 
     result =
       Ecto.Multi.new()
