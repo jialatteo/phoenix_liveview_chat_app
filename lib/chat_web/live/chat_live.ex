@@ -217,7 +217,7 @@ defmodule ChatWeb.ChatLive do
           <div class="flex w-full items-center gap-2">
             <label
               for="mobile-sidebar-toggle"
-              class="font-bold sm:hidden text-xl text-gray-400 hover:text-gray-600 pr-2"
+              class="font-bold cursor-pointer sm:hidden text-xl text-gray-400 hover:text-gray-600 pr-2"
             >
               ☰
             </label>
