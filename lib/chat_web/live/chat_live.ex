@@ -68,7 +68,7 @@ defmodule ChatWeb.ChatLive do
   def render(assigns) do
     ~H"""
     <div class="flex h-screen overflow-x-hidden">
-      <div id="sidebar" class="flex flex-col sm:w-64 bg-[#f2f3f5] text-lg text-[#69737F]">
+      <div class="hidden sm:flex flex-col sm:w-64 bg-[#f2f3f5] text-lg text-[#69737F]">
         <div class="flex border-b-2 border-gray-300 justify-between items-center p-1 px-2">
           <h1 class="text-2xl font-semibold">Rooms</h1>
           
@@ -137,18 +137,90 @@ defmodule ChatWeb.ChatLive do
         </div>
       </div>
       
+      <div class="sm:hidden z-30">
+        <input type="checkbox" id="mobile-sidebar-toggle" class="hidden peer" />
+        <div class="fixed inset-0 top-0 bg-black bg-opacity-50 left-0 hidden peer-checked:block">
+          <label for="mobile-sidebar-toggle" class="absolute inset-0"></label>
+          <div class="h-full flex-col flex absolute left-0 top-0 w-64 bg-[#f2f3f5] text-lg text-[#69737F]">
+            <div class="flex border-b-2 border-gray-300 justify-between items-center p-1 px-2">
+              <h1 class="text-2xl font-semibold">Rooms</h1>
+              
+              <div class="relative group">
+                <button
+                  phx-click={show_modal("create-room-modal")}
+                  class="text-4xl pb-1 text-[#8d8f92] hover:text-[#a9abafcb] group"
+                >
+                  +
+                  <div class="absolute left-1/2 transform
+                       -translate-x-1/2 z-50  w-max px-2 py-1
+                       text-sm text-white bg-gray-700 rounded
+                       shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none">
+                    Add new room
+                  </div>
+                </button>
+              </div>
+            </div>
+            
+            <div
+              id="mobile-rooms"
+              class="flex-1 flex flex-col w-64 overflow-y-auto overflow-x-hidden gap-1 p-2"
+              phx-update="stream"
+            >
+              <.link
+                :for={{dom_id, room} <- @streams.rooms}
+                class={[
+                  "flex items-center gap-2 hover:bg-[#e5e8ec]  w-full p-2 rounded hover:text-black",
+                  room.id == @current_room.id &&
+                    "pointer-events-none bg-[#D4D7DC] text-black"
+                ]}
+                navigate={~p"/chat/#{room.id}"}
+                id={"mobile-#{dom_id}"}
+              >
+                <span class="font-semibold text-gray-500 text-2xl">#</span>
+                <p class="truncate">{room.name}</p>
+              </.link>
+            </div>
+            
+            <div class="border-t-2 p-2 border-gray-400">
+              <div class="flex items-center gap-2">
+                <img
+                  src={@current_user.profile_image}
+                  class="h-10 w-10 border border-gray-400 rounded-full"
+                  alt="pokemon"
+                />
+                <p class="font-medium text-base text-black break-all">
+                  {@current_user.email}
+                </p>
+              </div>
+              
+              <.link
+                href={~p"/users/settings"}
+                class="bg-gray-700 block text-white w-full text-center hover:bg-gray-800 text-sm rounded mb-2 mt-4 p-2 px-2 mr-2"
+              >
+                Settings
+              </.link>
+              
+              <.link
+                href={~p"/users/log_out"}
+                method="delete"
+                class="bg-gray-700 block text-white w-full text-center hover:bg-gray-800 text-sm rounded p-2 px-2 mr-2"
+              >
+                Log out
+              </.link>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div class="w-full flex flex-col overflow-x-hidden">
         <div class="flex z-10 bg-white w-full items-center justify-between pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
           <div class="flex w-full items-center gap-2">
-            <button
+            <label
+              for="mobile-sidebar-toggle"
               class="font-bold sm:hidden text-xl text-gray-400 hover:text-gray-600 pr-2"
-              phx-click={
-                JS.toggle_class("hidden", to: "#sidebar")
-                |> JS.add_class("clicked-burger", to: "#sidebar")
-              }
             >
               ☰
-            </button>
+            </label>
              <span class="text-3xl text-gray-500 font-semibold">#</span>
             <span class="text-2xl font-semibold pb-1 truncate flex-grow">{@current_room.name}</span>
             <button phx-click={show_modal("room-info-modal")}>
