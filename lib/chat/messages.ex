@@ -38,7 +38,6 @@ defmodule Chat.Messages do
     |> limit(^limit)
     |> preload([:user, :room])
     |> Repo.all()
-    |> Enum.reverse()
   end
 
   @doc """

@@ -27,13 +27,12 @@ defmodule ChatWeb.ChatLive do
     room_changeset = Rooms.change_room(%Room{})
 
     now = DateTime.utc_now()
-    messages = Messages.get_messages_from_room(room_id, now, 50)
+    messages = Messages.get_messages_from_room(room_id, now, 100) |> Enum.reverse()
 
     {:ok,
      socket
      |> stream(:rooms, Rooms.list_rooms_of_user(current_user.id))
      |> stream(:messages, messages)
-     #  |> stream(:messages, Messages.get_messages_from_room(room_id))
      |> stream(:current_room_users, UserRooms.get_users_in_room(room_id))
      |> assign(:earliest_message, List.first(messages))
      |> assign(:current_room, Rooms.get_room!(room_id))
@@ -602,12 +601,16 @@ defmodule ChatWeb.ChatLive do
 
     earliest_message = socket.assigns.earliest_message.inserted_at
 
-    messages = Messages.get_messages_from_room(current_room.id, earliest_message, 10)
+    messages = Messages.get_messages_from_room(current_room.id, earliest_message, 100)
 
-    {:noreply,
-     socket
-     |> stream(:messages, messages, at: 0)
-     |> assign(:earliest_message, List.first(messages))
-     |> push_event("messages-loaded", %{})}
+    if messages == [] do
+      {:noreply, socket}
+    else
+      {:noreply,
+       socket
+       |> stream(:messages, messages, at: 0)
+       |> assign(:earliest_message, List.first(messages))
+       |> push_event("messages-loaded", %{})}
+    end
   end
 end
