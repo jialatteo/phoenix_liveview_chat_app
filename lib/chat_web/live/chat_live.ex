@@ -65,14 +65,11 @@ defmodule ChatWeb.ChatLive do
     |> Timex.format!("%d %B %Y", :strftime)
   end
 
+  # phx-hook="SidebarResize"
   def render(assigns) do
     ~H"""
     <div class="flex h-screen overflow-x-hidden">
-      <div
-        phx-hook="SidebarResize"
-        id="sidebar"
-        class="flex flex-col sm:w-64 bg-[#f2f3f5] text-lg text-[#69737F]"
-      >
+      <div id="sidebar" class="flex flex-col sm:w-64 bg-[#f2f3f5] text-lg text-[#69737F]">
         <div class="flex border-b-2 border-gray-300 justify-between items-center p-1 px-2">
           <h1 class="text-2xl font-semibold">Rooms</h1>
           
@@ -600,18 +597,17 @@ defmodule ChatWeb.ChatLive do
      |> push_navigate(to: ~p"/")}
   end
 
-  def handle_event("load_more", _params, socket) do
+  def handle_event("load-more", _params, socket) do
     current_room = socket.assigns.current_room
 
     earliest_message = socket.assigns.earliest_message.inserted_at
-
-    IO.inspect(earliest_message, label: "load more")
 
     messages = Messages.get_messages_from_room(current_room.id, earliest_message, 10)
 
     {:noreply,
      socket
      |> stream(:messages, messages, at: 0)
-     |> assign(:earliest_message, List.first(messages))}
+     |> assign(:earliest_message, List.first(messages))
+     |> push_event("messages-loaded", %{})}
   end
 end

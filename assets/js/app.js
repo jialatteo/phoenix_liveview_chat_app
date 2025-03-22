@@ -30,10 +30,18 @@ let ScrollToBottomAndLoadMore = {
       this.scrollToBottomAndLoadMore();
     });
 
+    let previousScrollHeight = this.el.scrollHeight;
+
     this.el.addEventListener("scroll", () => {
       if (this.el.scrollTop === 0) {
-        this.pushEvent("load_more");
+        previousScrollHeight = this.el.scrollHeight;
+        this.pushEvent("load-more");
       }
+    });
+
+    this.handleEvent("messages-loaded", () => {
+      const newScrollHeight = this.el.scrollHeight;
+      this.el.scrollTop = newScrollHeight - previousScrollHeight;
     });
   },
   scrollToBottomAndLoadMore() {
@@ -41,32 +49,32 @@ let ScrollToBottomAndLoadMore = {
   },
 };
 
-let SidebarResize = {
-  mounted() {
-    const sidebar = document.getElementById("sidebar");
+// let SidebarResize = {
+//   mounted() {
+//     const sidebar = document.getElementById("sidebar");
 
-    const handleResize = () => {
-      if (window.innerWidth >= 640) {
-        sidebar.classList.remove("hidden");
-        sidebar.classList.remove("clicked-burger");
-      }
+//     const handleResize = () => {
+//       if (window.innerWidth >= 640) {
+//         sidebar.classList.remove("hidden");
+//         sidebar.classList.remove("clicked-burger");
+//       }
 
-      if (
-        window.innerWidth < 640 &&
-        !sidebar.classList.contains("clicked-burger")
-      ) {
-        sidebar.classList.add("hidden");
-      }
-    };
+//       if (
+//         window.innerWidth < 640 &&
+//         !sidebar.classList.contains("clicked-burger")
+//       ) {
+//         sidebar.classList.add("hidden");
+//       }
+//     };
 
-    window.addEventListener("resize", handleResize);
-    handleResize(); // Run on mount to set initial state
-  },
-};
+//     window.addEventListener("resize", handleResize);
+//     handleResize(); // Run on mount to set initial state
+//   },
+// };
 
 let Hooks = {
   ScrollToBottomAndLoadMore: ScrollToBottomAndLoadMore,
-  SidebarResize: SidebarResize,
+  // SidebarResize: SidebarResize,
 };
 
 let csrfToken = document
