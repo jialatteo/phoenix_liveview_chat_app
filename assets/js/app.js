@@ -22,15 +22,21 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
 
-let ScrollToBottom = {
+let ScrollToBottomAndLoadMore = {
   mounted() {
-    this.scrollToBottom();
+    this.scrollToBottomAndLoadMore();
 
     this.handleEvent("scroll-to-bottom", () => {
-      this.scrollToBottom();
+      this.scrollToBottomAndLoadMore();
+    });
+
+    this.el.addEventListener("scroll", () => {
+      if (this.el.scrollTop === 0) {
+        this.pushEvent("load_more");
+      }
     });
   },
-  scrollToBottom() {
+  scrollToBottomAndLoadMore() {
     this.el.scrollTop = this.el.scrollHeight;
   },
 };
@@ -58,7 +64,10 @@ let SidebarResize = {
   },
 };
 
-let Hooks = { ScrollToBottom: ScrollToBottom, SidebarResize: SidebarResize };
+let Hooks = {
+  ScrollToBottomAndLoadMore: ScrollToBottomAndLoadMore,
+  SidebarResize: SidebarResize,
+};
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")

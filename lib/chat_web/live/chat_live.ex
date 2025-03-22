@@ -26,11 +26,16 @@ defmodule ChatWeb.ChatLive do
 
     room_changeset = Rooms.change_room(%Room{})
 
+    now = DateTime.utc_now()
+    messages = Messages.get_messages_from_room(room_id, now, 50)
+
     {:ok,
      socket
      |> stream(:rooms, Rooms.list_rooms_of_user(current_user.id))
-     |> stream(:messages, Messages.get_messages_from_room(room_id))
+     |> stream(:messages, messages)
+     #  |> stream(:messages, Messages.get_messages_from_room(room_id))
      |> stream(:current_room_users, UserRooms.get_users_in_room(room_id))
+     |> assign(:earliest_message, List.first(messages))
      |> assign(:current_room, Rooms.get_room!(room_id))
      |> assign(:message_form, to_form(message_changeset))
      |> assign(:room_form, to_form(room_changeset))
@@ -290,7 +295,7 @@ defmodule ChatWeb.ChatLive do
         
         <div
           id="messages-div"
-          phx-hook="ScrollToBottom"
+          phx-hook="ScrollToBottomAndLoadMore"
           class="-mt-5 pb-4 flex-1 overflow-y-auto"
           phx-update="stream"
         >
@@ -593,5 +598,20 @@ defmodule ChatWeb.ChatLive do
      )
      |> stream_delete(:rooms, current_room)
      |> push_navigate(to: ~p"/")}
+  end
+
+  def handle_event("load_more", _params, socket) do
+    current_room = socket.assigns.current_room
+
+    earliest_message = socket.assigns.earliest_message.inserted_at
+
+    IO.inspect(earliest_message, label: "load more")
+
+    messages = Messages.get_messages_from_room(current_room.id, earliest_message, 10)
+
+    {:noreply,
+     socket
+     |> stream(:messages, messages, at: 0)
+     |> assign(:earliest_message, List.first(messages))}
   end
 end
