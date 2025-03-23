@@ -5,7 +5,7 @@ defmodule Chat.Users do
 
   import Ecto.Query, warn: false
   alias Chat.Repo
-  alias Chat.Messages.Message
+  alias Chat.Messages
 
   alias Chat.Users.{User, UserToken, UserNotifier}
   alias Chat.UserRooms.UserRoom
@@ -142,7 +142,7 @@ defmodule Chat.Users do
       |> Ecto.Multi.insert(:insert_user_room, fn %{user: user} ->
         UserRoom.changeset(%UserRoom{}, %{"user_id" => user.id, "room_id" => 1})
       end)
-      |> Ecto.Multi.insert(:insert_join_message, fn %{insert_user_room: user_room} ->
+      |> Ecto.Multi.run(:insert_join_message, fn _repo, %{insert_user_room: user_room} ->
         message_params = %{
           "user_id" => user_room.user_id,
           "room_id" => user_room.room_id,
@@ -150,7 +150,7 @@ defmodule Chat.Users do
           "content" => "has joined the room."
         }
 
-        Message.changeset(%Message{}, message_params)
+        Messages.create_message(message_params)
       end)
       |> Repo.transaction()
 

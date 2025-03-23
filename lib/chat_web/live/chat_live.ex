@@ -506,7 +506,7 @@ defmodule ChatWeb.ChatLive do
     {:noreply, stream_insert(socket, :messages, message)}
   end
 
-  def handle_info({:room_added_user, user_id, message} = params, socket) do
+  def handle_info({:room_added_user, user_id, message}, socket) do
     user = Users.get_user!(user_id)
 
     {:noreply,
@@ -671,7 +671,7 @@ defmodule ChatWeb.ChatLive do
        "Left room #{current_room.name}!"
      )
      |> stream_delete(:rooms, current_room)
-     |> push_navigate(to: ~p"/")}
+     |> push_navigate(to: ~p"/chat")}
   end
 
   def handle_event("load-more", _params, socket) do

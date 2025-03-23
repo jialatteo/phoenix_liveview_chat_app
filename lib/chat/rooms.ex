@@ -5,7 +5,6 @@ defmodule Chat.Rooms do
 
   import Ecto.Query, warn: false
   alias Chat.Repo
-  alias Chat.Messages.Message
   alias Chat.Messages
 
   alias Chat.Rooms.Room
