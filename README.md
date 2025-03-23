@@ -1,18 +1,45 @@
-# Chat
+## Real-time Chat Application
 
-To start your Phoenix server:
+This is a real-time chat application built with **Phoenix LiveView**, which is built on top of the **Elixir** programming language. The application uses **PostgreSQL** for data storage and **Tailwind CSS** for styling.
 
-  * Run `mix setup` to install and setup dependencies
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+# **[Click here to visit the live demo](https://phoenix-liveview-chat-application.fly.dev/)**
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+## Features
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+- **Real-time messaging** using Phoenix's built-in PubSub library.
+- **Users can create rooms**, invite friends, and leave groups.
+- **Persistent chat history** with infinite scrolling.
+- **Responsive design** with Tailwind CSS, inspired by [Discord's UI](https://cdn.prod.website-files.com/5f9072399b2640f14d6a2bf4/6567cd04eadab22634f69221_LTR%20-%20Server%20(1).png).
 
-## Learn more
+![Chat Application Screenshot](./priv/static/images/screenshot.png)
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+
+
+## Run locally
+
+To set up the application locally:
+
+1. **Clone the repository:**
+
+    ```bash
+    git clone https://github.com/yourusername/chat-application.git
+    cd chat-application
+    mix setup
+    ```
+
+3. **Set up the database:**
+
+    Make sure you have PostgreSQL installed. Then run the following commands to create and migrate the database:
+
+    ```bash
+    mix ecto.create
+    mix ecto.migrate
+    ```
+
+4. **Start the Phoenix server:**
+
+    ```bash
+    mix phx.server
+    ```
+
+    The app will be available at `http://localhost:4000`.
