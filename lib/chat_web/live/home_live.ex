@@ -2,11 +2,12 @@ defmodule ChatWeb.HomeLive do
   use ChatWeb, :live_view
   alias Chat.Rooms
   alias Chat.Rooms.Room
-  alias Chat.UserRooms
 
   def mount(_params, _session, socket) do
+    current_user = socket.assigns.current_user
+
     if connected?(socket) do
-      Chat.Rooms.subscribe()
+      Chat.UserRooms.subscribe({:user_id, current_user.id})
     end
 
     room_changeset = Rooms.change_room(%Room{})
@@ -94,15 +95,13 @@ defmodule ChatWeb.HomeLive do
     """
   end
 
-  def handle_info({:room_created, room}, socket) do
-    if UserRooms.user_room_exist(%{
-         "user_id" => socket.assigns.current_user.id,
-         "room_id" => room.id
-       }) do
-      {:noreply, stream_insert(socket, :rooms, room)}
-    else
-      {:noreply, socket}
-    end
+  def handle_info({:user_added_room, room_id}, socket) do
+    room = Rooms.get_room!(room_id)
+
+    {:noreply,
+     socket
+     |> stream_insert(:rooms, room)
+     |> put_flash(:info, "You have been added to room #{room.name}")}
   end
 
   def handle_event("validate_room", %{"room" => room_params}, socket) do
