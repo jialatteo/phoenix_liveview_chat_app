@@ -91,6 +91,17 @@ defmodule ChatWeb.HomeLive do
           Select a room on the left to view its messages or create a new room.
         </p>
       </div>
+      
+      <.modal id="create-room-modal">
+        <.form for={@room_form} phx-submit="save_room" phx-change="validate_room">
+          <.input label="Room name" field={@room_form[:name]} />
+          <div class="flex mt-8">
+            <button class="ml-auto p-2 rounded bg-gray-700 hover:bg-gray-900 text-white" type="submit">
+              Create Room
+            </button>
+          </div>
+        </.form>
+      </.modal>
     </div>
     """
   end
@@ -113,6 +124,7 @@ defmodule ChatWeb.HomeLive do
   end
 
   def handle_event("save_room", %{"room" => room_params}, socket) do
+    IO.inspect(room_params, label: "here")
     room_params = Map.put(room_params, "user_id", socket.assigns.current_user.id)
 
     case Rooms.create_room(room_params) do
@@ -120,6 +132,8 @@ defmodule ChatWeb.HomeLive do
         {:noreply,
          socket
          |> assign(:room_form, to_form(Rooms.change_room(%Room{})))
+         |> stream_insert(:rooms, room)
+         |> push_navigate(to: ~p"/chat/#{room.id}")
          |> put_flash(:info, "Room #{room.name} created")}
 
       {:error, changeset} ->

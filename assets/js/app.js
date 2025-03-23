@@ -49,29 +49,6 @@ let ScrollToBottomAndLoadMore = {
   },
 };
 
-// let SidebarResize = {
-//   mounted() {
-//     const sidebar = document.getElementById("sidebar");
-
-//     const handleResize = () => {
-//       if (window.innerWidth >= 640) {
-//         sidebar.classList.remove("hidden");
-//         sidebar.classList.remove("clicked-burger");
-//       }
-
-//       if (
-//         window.innerWidth < 640 &&
-//         !sidebar.classList.contains("clicked-burger")
-//       ) {
-//         sidebar.classList.add("hidden");
-//       }
-//     };
-
-//     window.addEventListener("resize", handleResize);
-//     handleResize(); // Run on mount to set initial state
-//   },
-// };
-
 let Hooks = {
   ScrollToBottomAndLoadMore: ScrollToBottomAndLoadMore,
   // SidebarResize: SidebarResize,
@@ -99,3 +76,9 @@ liveSocket.connect();
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket;
+
+window.addEventListener("phx:js-exec", ({ detail }) => {
+  document.querySelectorAll(detail.to).forEach((el) => {
+    liveSocket.execJS(el, el.getAttribute(detail.attr));
+  });
+});
