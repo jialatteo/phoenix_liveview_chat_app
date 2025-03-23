@@ -6,6 +6,7 @@ defmodule Chat.Rooms do
   import Ecto.Query, warn: false
   alias Chat.Repo
   alias Chat.Messages.Message
+  alias Chat.Messages
 
   alias Chat.Rooms.Room
   alias Chat.UserRooms.UserRoom
@@ -70,7 +71,7 @@ defmodule Chat.Rooms do
           "is_admin" => true
         })
       end)
-      |> Ecto.Multi.insert(:insert_join_message, fn %{insert_user_room: user_room} ->
+      |> Ecto.Multi.run(:insert_join_message, fn _repo, %{insert_user_room: user_room} ->
         message_params = %{
           "user_id" => user_room.user_id,
           "room_id" => user_room.room_id,
@@ -78,7 +79,7 @@ defmodule Chat.Rooms do
           "content" => "has joined the room."
         }
 
-        Message.changeset(%Message{}, message_params)
+        Messages.create_message(message_params)
       end)
 
     case Repo.transaction(multi) do

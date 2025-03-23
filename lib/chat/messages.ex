@@ -33,7 +33,7 @@ defmodule Chat.Messages do
 
   def get_messages_from_room(room_id, inserted_at, limit) do
     Message
-    |> where([m], m.room_id == ^room_id and m.inserted_at < ^inserted_at)
+    |> where([m], m.room_id == ^room_id and m.inserted_at <= ^inserted_at)
     |> order_by([m], desc: m.inserted_at)
     |> limit(^limit)
     |> preload([:user, :room])

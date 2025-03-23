@@ -507,7 +507,6 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_info({:room_added_user, user_id, message} = params, socket) do
-    IO.inspect(params, label: "received :room_added_user broadcast")
     user = Users.get_user!(user_id)
 
     {:noreply,
@@ -573,12 +572,11 @@ defmodule ChatWeb.ChatLive do
     room_params = Map.put(room_params, "user_id", socket.assigns.current_user.id)
 
     case Rooms.create_room(room_params) do
-      {:ok, room, message} ->
+      {:ok, room, _message} ->
         {:noreply,
          socket
          |> assign(:room_form, to_form(Rooms.change_room(%Room{})))
          |> stream_insert(:rooms, room)
-         |> stream_insert(:messages, message)
          |> push_navigate(to: ~p"/chat/#{room.id}")
          |> put_flash(:info, "Room #{room.name} created")}
 
@@ -659,10 +657,6 @@ defmodule ChatWeb.ChatLive do
      )
      |> assign(:invite_users_form, to_form(updated_filters))
      |> push_event("js-exec", %{to: "#add-members-modal", attr: "data-cancel"})}
-
-    #  |> push_event("close-add-members-modal", %{})}
-
-    #  |> redirect(to: ~p"/chat/#{current_room.id}")}
   end
 
   def handle_event("leave_room", _, socket) do
