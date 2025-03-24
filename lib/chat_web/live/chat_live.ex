@@ -213,7 +213,7 @@ defmodule ChatWeb.ChatLive do
       </div>
       
       <div class="w-full flex flex-col overflow-x-hidden">
-        <div class="flex z-10 bg-white w-full items-center justify-between pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
+        <div class="flex z-10 sticky top-0 bg-white w-full items-center justify-between pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
           <div class="flex w-full items-center gap-2">
             <label
               for="mobile-sidebar-toggle"
