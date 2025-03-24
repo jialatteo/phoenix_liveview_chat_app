@@ -213,8 +213,8 @@ defmodule ChatWeb.ChatLive do
       </div>
       
       <div class="w-full flex flex-col overflow-x-hidden">
-        <div class="flex z-10 fixed top-0 right-5 sm:left-64 left-0 bg-white items-center justify-between pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
-          <div class="flex w-full items-center gap-2">
+        <div class="flex z-10 fixed top-0 right-0 sm:left-64 left-0 bg-white items-center justify-between pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
+          <div class="flex w-full items-center gap-2 mr-2">
             <label
               for="mobile-sidebar-toggle"
               class="font-bold cursor-pointer sm:hidden text-xl text-gray-400 hover:text-gray-600 pr-2"
