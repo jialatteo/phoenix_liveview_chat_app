@@ -213,7 +213,7 @@ defmodule ChatWeb.ChatLive do
       </div>
       
       <div class="w-full flex flex-col overflow-x-hidden">
-        <div class="flex z-10 fixed top-0 bg-white w-full items-center justify-between pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
+        <div class="flex z-10 fixed top-0 right-5 sm:left-64 left-0 bg-white items-center justify-between pl-6 pt-[9px] pb-[7px] border-b-2 border-gray-300">
           <div class="flex w-full items-center gap-2">
             <label
               for="mobile-sidebar-toggle"
@@ -454,7 +454,7 @@ defmodule ChatWeb.ChatLive do
         </div>
         
         <.form
-          class="px-2 pb-4 bg-white flex gap-2 sticky bottom-0"
+          class="px-2 pb-4 bg-white flex gap-2 fixed bottom-0 right-2 sm:left-64 left-0"
           for={@message_form}
           phx-submit="save_message"
           phx-change="validate_message"
