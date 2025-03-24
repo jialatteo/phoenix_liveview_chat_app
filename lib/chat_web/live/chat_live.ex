@@ -364,7 +364,7 @@ defmodule ChatWeb.ChatLive do
         <div
           id="messages-div"
           phx-hook="ScrollToBottomAndLoadMore"
-          class="-mt-5 pb-4 flex-1 overflow-y-auto"
+          class="-mt-5 pt-14 pb-20 flex-1 overflow-y-auto"
           phx-update="stream"
         >
           <div :for={{dom_id, message} <- @streams.messages} class="group" id={dom_id}>
